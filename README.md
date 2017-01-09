@@ -1,7 +1,11 @@
 # csga-bot
-
-To be continued.
-
+  
+beep-beeeeeep
+I'm a bot
+A Discord bot
+Probably just for testing
+beep beep
+  
 ## Building
 
 1.Add [Lombok](https://projectlombok.org/) plugin in your IDE.
