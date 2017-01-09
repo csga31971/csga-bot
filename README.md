@@ -10,7 +10,18 @@ beep beep
 
 1.Add [Lombok](https://projectlombok.org/) plugin in your IDE.
 
-2.To be continued.
+2.Running the project.
+
+- [Package application](https://github.com/libgdx/libgdx/wiki/Gradle-on-the-Commandline#packaging-the-project)
+
+- Running the desktop project in IDEA
+
+    Open the Run/Debug Configurations, add Application and set
+    
+    >Main class = com.moebuff.discord.BotLauncher  
+    Working Directory = assets
+
+    Save and run.
 
 ## Licence
 
