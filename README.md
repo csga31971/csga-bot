@@ -1,10 +1,10 @@
 # csga-bot
   
-beep-beeeeeep
-I'm a bot
-A Discord bot
-Probably just for testing
-beep beep
+beep-beeeeeep  
+I'm a bot  
+A Discord bot  
+Probably just for testing  
+beep beep  
   
 ## Building
 
