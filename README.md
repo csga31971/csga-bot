@@ -11,7 +11,7 @@ beep beep
 This project use [Lombok](https://projectlombok.org/) to generate getters and setters.
 You may also use [material](https://github.com/equinusocio/material-theme) to optimize your theme.
 
-### Running project
+### Running the project
 
 - IDEA: `Run -> Edit Configurations...`, click the plus (+) button and select `Application`.
 Set the `Name` to `csga-bot`. Set the field `Use classpath of module` to `csga-bot_main`,
