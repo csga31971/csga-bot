@@ -2,7 +2,7 @@
 <!-- 设置 status=DEBUG 查看log4j的装配过程 -->
 <Configuration status="TRACE">
     <Properties>
-        <Property name="LOG_HOME">.csga/logs</Property>
+        <Property name="LOG_HOME">.csga-bot/logs</Property>
         <!-- 日志备份目录 -->
         <property name="BACKUP_HOME">${LOG_HOME}/backup</property>
         <Property name="LOG_PATTERN">

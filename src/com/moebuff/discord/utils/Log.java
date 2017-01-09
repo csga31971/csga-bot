@@ -81,22 +81,27 @@ public class Log {
         return MessageFormatter.arrayFormat(String.format(m, args), args);
     }
 
+    @Deprecated
     public static void trace(String m, Object... args) {
         print(getTag(Level.TRACE, 2), formatMessage(m, args));
     }
 
+    @Deprecated
     public static void debug(String m, Object... args) {
         print(getTag(Level.DEBUG, 2), formatMessage(m, args));
     }
 
+    @Deprecated
     public static void info(String m, Object... args) {
         print(getTag(Level.INFO, 2), formatMessage(m, args));
     }
 
+    @Deprecated
     public static void warn(String m, Object... args) {
         print(getTag(Level.WARN, 2), formatMessage(m, args));
     }
 
+    @Deprecated
     public static void error(String m, Object... args) {
         print(getTag(Level.ERROR, 2), formatMessage(m, args));
     }
