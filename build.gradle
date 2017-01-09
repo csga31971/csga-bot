@@ -13,21 +13,11 @@ sourceSets.main {
 }
 
 project.ext.mainClassName = "com.moebuff.discord.BotLauncher"
-project.ext.assetsDir = new File("assets")
-
-task run(dependsOn: classes, type: JavaExec) {
-    main = project.mainClassName
-    classpath = sourceSets.main.runtimeClasspath
-    standardInput = System.in
-    workingDir = project.assetsDir
-    ignoreExitValue = true
-}
 
 task dist(type: Jar) {
     from files(sourceSets.main.output.classesDir)
     from files(sourceSets.main.output.resourcesDir)
     from { configurations.compile.collect { zipTree(it) } }
-    from files(project.assetsDir) { exclude '.csga' }
     exclude 'log4j2-test.xml'
 
     manifest {
