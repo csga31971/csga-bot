@@ -8,9 +8,28 @@ beep beep
   
 ## Building
 
-1. Add [Lombok](https://projectlombok.org/) plugin in your IDE.
+This project use [Lombok](https://projectlombok.org/) to generate getters and setters.
+You may also use [material](https://github.com/equinusocio/material-theme) to optimize your theme.
 
-2. Package application. [Wiki](https://github.com/libgdx/libgdx/wiki/Gradle-on-the-Commandline#packaging-the-project)
+### Running project
+
+- IDEA: `Run -> Edit Configurations...`, click the plus (+) button and select `Application`.
+Set the `Name` to `csga-bot`. Set the field `Use classpath of module` to `csga-bot_main`,
+then click on the button of the `Main class` field and select the `BotLauncher` class.
+Click `Apply` and then `OK`. You have now created a run configuration for your desktop project.
+You can now select the configuration and run it.
+
+- Eclipse: Right click the desktop project, `Run As -> Java Application`.
+Select the desktop starter class (e.g. BotLauncher.java).
+    
+### Packaging the project
+
+`gradlew dist`
+
+This will create a runnable JAR file located in the `build/libs/ folder`.
+It contains all necessary code and can be run either by double clicking or on the command line
+via `java -jar jar-file-name.jar`. Your audience must have a JVM installed for this to work. 
+The JAR will work on Windows, Linux and Mac OS X!
 
 ## Licence
 
