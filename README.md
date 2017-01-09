@@ -26,7 +26,7 @@ Select the desktop starter class (e.g. BotLauncher.java).
 
 `gradlew dist`
 
-This will create a runnable JAR file located in the `build/libs/ folder`.
+This will create a runnable JAR file located in the `build/libs/` folder.
 It contains all necessary code and can be run either by double clicking or on the command line
 via `java -jar jar-file-name.jar`. Your audience must have a JVM installed for this to work. 
 The JAR will work on Windows, Linux and Mac OS X!
