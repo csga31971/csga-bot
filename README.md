@@ -6,6 +6,17 @@ A Discord bot
 Probably just for testing  
 beep beep  
   
+## Configurations
+
+Add the `moe.properties` file in the root directory of the project.
+
+Attribute Name      | Description
+------------------- | -------------------
+client.id           | In `APP DETAILS`, your `Client ID`.
+client.secret       | In `APP DETAILS`, your `Client Secret`.
+bot.username        | In `APP BOT USER`, your `Username`.
+bot.token           | In `APP BOT USER`, your `Token`.
+
 ## Building
 
 This project use [Lombok](https://projectlombok.org/) to generate getters and setters.
