@@ -54,6 +54,13 @@ public class ClassKit {
         return getClasses(pkg, false);
     }
 
+    /**
+     * 获取指定包下的类集合。若要深入子包请将 deep 设置为 true
+     *
+     * @param pkg  包名
+     * @param deep 为true，允许递归子包
+     * @return 指定包下的类集合
+     */
     public static Class[] getClasses(String pkg, boolean deep) {
         Set<Class> classes = new HashSet<>();
         ClassLoader loader = LoaderUtil.getThreadContextClassLoader();
@@ -115,11 +122,10 @@ public class ClassKit {
                     || !path.startsWith(pkg)) {
                 continue;
             }
-
-            name = FilenameUtils.getBaseName(name);
-            name = String.format("%s.%s", pkg, name);
-            Class clazz = LoaderUtil.loadClass(name, true);
             if (deep || path.replace(pkg, "").isEmpty()) {
+                name = FilenameUtils.getBaseName(name);
+                name = String.format("%s.%s", pkg, name);
+                Class clazz = LoaderUtil.loadClass(name, true);
                 classes.add(clazz);
             }
         }
