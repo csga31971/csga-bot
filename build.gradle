@@ -25,6 +25,8 @@ task dist(type: Jar) {
     }
 }
 
+dist.dependsOn classes
+
 repositories {
     mavenLocal()
     mavenCentral()

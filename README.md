@@ -8,7 +8,7 @@ beep beep
   
 ## Configurations
 
-Add the `moe.properties` file in the root directory of the project.
+Add the `moe.properties` file in the `res` directory of the project.
 
 Attribute Name      | Description
 ------------------- | -------------------
