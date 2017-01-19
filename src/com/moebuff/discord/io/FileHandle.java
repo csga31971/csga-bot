@@ -1,6 +1,7 @@
 package com.moebuff.discord.io;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URI;
 
 /**
@@ -31,5 +32,9 @@ public class FileHandle extends File {
 
     public FileHandle child(String name) {
         return new FileHandle(this, name);
+    }
+
+    public InputStream read() {
+        return FileKit.openInputStream(this);
     }
 }
