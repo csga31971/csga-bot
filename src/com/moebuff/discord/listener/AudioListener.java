@@ -2,7 +2,6 @@ package com.moebuff.discord.listener;
 
 import com.moebuff.discord.io.FF;
 import com.moebuff.discord.io.FileHandle;
-import com.moebuff.discord.utils.UnhandledException;
 import org.apache.commons.lang3.time.FastDateFormat;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
@@ -99,21 +98,15 @@ public class AudioListener {
                 if (list.size() == 0) {
                     channel.sendMessage("No currently playing content.");
                 } else
-                    list.forEach(t -> {
-                        int index = list.indexOf(t);
-                        String title = (String) t.getMetadata().get("title");
-                        String msg = String.format("%s.%s [%s] %s",
-                                index + 1,
+                    for (int i = 0; i < list.size(); i++) {
+                        AudioPlayer.Track track = list.get(i);
+                        String title = (String) track.getMetadata().get("title");
+                        channel.sendMessage(String.format("%s.%s [%s] %s",
+                                i + 1,
                                 title,
-                                TIME.format(t.getTotalTrackTime()),
-                                index == 0 ? "Playing" : "Wait");
-
-                        try {
-                            channel.sendMessage(msg);
-                        } catch (Exception e) {
-                            throw new UnhandledException(e);
-                        }
-                    });
+                                TIME.format(track.getTotalTrackTime()),
+                                i == 0 ? "Playing" : "Wait"));
+                    }
                 break;
         }
     }
