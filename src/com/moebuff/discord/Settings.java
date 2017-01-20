@@ -14,9 +14,6 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
  * @author muto
  */
 public class Settings {
-    public static final String ID;
-    public static final String SECRET;
-    public static final String USERNAME;
     public static final String TOKEN;
 
     static {
@@ -26,11 +23,9 @@ public class Settings {
                         .configure(
                                 params.properties().setFileName("moe.properties")
                         );
+
         try {
             Configuration config = builder.getConfiguration();
-            ID = config.getString("client.id");
-            SECRET = config.getString("client.secret");
-            USERNAME = config.getString("bot.username");
             TOKEN = config.getString("bot.token");
         } catch (ConfigurationException e) {
             throw new UnhandledException(e);

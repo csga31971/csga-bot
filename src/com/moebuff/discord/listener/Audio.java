@@ -2,9 +2,7 @@ package com.moebuff.discord.listener;
 
 import com.moebuff.discord.io.FF;
 import com.moebuff.discord.io.FileHandle;
-import org.apache.commons.lang3.time.FastDateFormat;
 import sx.blah.discord.api.events.EventSubscriber;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MissingPermissionsException;
@@ -22,7 +20,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,87 +29,13 @@ import java.util.Map;
  *
  * @author muto
  */
-public class AudioListener {
+public class Audio {
     // Stores the last channel that the join command was sent from
     private static final Map<IGuild, IChannel> LAST_CHANNEL = new HashMap<>();
 
     private static final String CHROME
             = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) " +
             "Chrome/55.0.2883.87 Safari/537.36";
-    private static final FastDateFormat TIME = FastDateFormat.getInstance("HH:mm:ss.SSS");
-
-    @EventSubscriber
-    public static void onMessage(MessageReceivedEvent event)
-            throws RateLimitException, DiscordException, MissingPermissionsException {
-        IMessage message = event.getMessage();
-        IUser user = message.getAuthor();
-        if (user.isBot()) return;
-
-        IChannel channel = message.getChannel();
-        IGuild guild = message.getGuild();
-        String[] split = message.getContent().split(" ");
-
-        String cmd = split[0];
-        if (!cmd.startsWith("!")) return;
-        String[] args = split.length > 1 ?
-                Arrays.copyOfRange(split, 1, split.length) :
-                new String[0];
-        switch (cmd.substring(1)) {
-            case "join":
-                LAST_CHANNEL.put(guild, channel);
-                join(channel, user);
-                break;
-            case "leave":
-                player(channel).clean();
-                LAST_CHANNEL.remove(guild);
-                leave(channel, user);
-                break;
-            case "queueUrl":
-                queueUrl(channel, String.join(" ", args));
-                break;
-            case "queueFile":
-                queueFile(channel, String.join(" ", args));
-                break;
-            case "play":
-                player(channel).setPaused(false);
-                break;
-            case "pause":
-                player(channel).setPaused(true);
-                break;
-            case "skip":
-                player(channel).skip();
-                break;
-            case "vol":
-                float volume = 100;
-                if (args.length == 0) {
-                    channel.sendMessage("volume ∈ [0,150], default is 100.");
-                } else {
-                    volume = Integer.parseInt(args[0]) / 100.0f;
-                    if (volume < 0) volume = 0;
-                    if (volume > 1.5) volume = 1.5f;
-                }
-                player(channel).setVolume(volume);
-                break;
-            case "list":
-                List<AudioPlayer.Track> list = player(channel).getPlaylist();
-                if (list.size() == 0) {
-                    channel.sendMessage("No currently playing content.");
-                } else
-                    for (int i = 0; i < list.size(); i++) {
-                        AudioPlayer.Track track = list.get(i);
-                        String title = (String) track.getMetadata().get("title");
-                        channel.sendMessage(String.format("%s.%s [%s] %s",
-                                i + 1,
-                                title,
-                                TIME.format(track.getTotalTrackTime()),
-                                i == 0 ? "Playing" : "Wait"));
-                    }
-                break;
-        }
-    }
-
-    // Track events
-    //---------------------------------------------------------------------------------------------
 
     @EventSubscriber
     public static void onTrackQueue(TrackQueueEvent event)
@@ -138,7 +61,7 @@ public class AudioListener {
         String msg = String.format("Finished playing **%s**.", getTrackTitle(event));
         channel.sendMessage(msg);
 
-        if (event.getNewTrack() == null) {
+        if (!event.getNewTrack().isPresent()) {
             channel.sendMessage("The playlist is now empty.");
         }
     }
@@ -146,14 +69,16 @@ public class AudioListener {
     // Audio player methods
     //---------------------------------------------------------------------------------------------
 
-    private static void join(IChannel channel, IUser user)
+    static void join(IGuild guild, IChannel channel, IUser user)
             throws RateLimitException, DiscordException, MissingPermissionsException {
+        LAST_CHANNEL.put(guild, channel);
         if (user.getConnectedVoiceChannels().size() < 1) {
             channel.sendMessage("You aren't in a voice channel!");
         } else {
             IUser our = channel.getClient().getOurUser();
             IVoiceChannel voice = user.getConnectedVoiceChannels().get(0);
             int userLimit = voice.getUserLimit();
+
             if (!voice.getModifiedPermissions(our).contains(Permissions.VOICE_CONNECT)) {
                 channel.sendMessage("I can't join that voice channel!");
             } else if (userLimit > 0 && voice.getConnectedUsers().size() >= userLimit) {
@@ -166,22 +91,25 @@ public class AudioListener {
         }
     }
 
-    private static void leave(IChannel channel, IUser user)
+    static void leave(IGuild guild, IChannel channel, IUser user)
             throws RateLimitException, DiscordException, MissingPermissionsException {
         List<IVoiceChannel> connections = user.getConnectedVoiceChannels();
         if (connections.size() < 1) {
             channel.sendMessage("I didn't join any channels!");
-        } else {
-            IVoiceChannel voice = connections.get(0);
-            if (voice.isConnected()) {
-                voice.leave();
-                String msg = String.format("Has left the **%s**.", voice.getName());
-                channel.sendMessage(msg);
-            }
+            return;
+        }
+
+        IVoiceChannel voice = connections.get(0);
+        if (voice.isConnected()) {
+            player(channel).clean();
+            LAST_CHANNEL.remove(guild);
+            voice.leave();
+            String msg = String.format("Has left the **%s**.", voice.getName());
+            channel.sendMessage(msg);
         }
     }
 
-    private static void queueUrl(IChannel channel, String spec)
+    static void queueUrl(IChannel channel, String spec)
             throws RateLimitException, DiscordException, MissingPermissionsException {
         try {
             URL url = new URL(spec);
@@ -196,7 +124,7 @@ public class AudioListener {
         }
     }
 
-    private static void queueFile(IChannel channel, String path)
+    static void queueFile(IChannel channel, String path)
             throws RateLimitException, DiscordException, MissingPermissionsException {
         FileHandle audio = FF.SONGS.child(path);
         if (!audio.exists()) {
@@ -208,8 +136,29 @@ public class AudioListener {
         }
     }
 
-    private static AudioPlayer player(IChannel channel) {
+    static AudioPlayer player(IChannel channel) {
         return AudioPlayer.getAudioPlayerForGuild(channel.getGuild());
+    }
+
+    static void list(IChannel channel)
+            throws RateLimitException, DiscordException, MissingPermissionsException {
+        AudioPlayer player = player(channel);
+        List<AudioPlayer.Track> list = player.getPlaylist();
+        if (list.size() == 0) {
+            channel.sendMessage("No currently playing content.");
+            return;
+        }
+
+        String status = player.isPaused() ? "Paused" : "Playing";
+        for (int i = 0; i < list.size(); i++) {
+            AudioPlayer.Track track = list.get(i);
+            String title = (String) track.getMetadata().get("title");
+            channel.sendMessage(String.format("%s.%s [%s] %s",
+                    i + 1,
+                    title,
+                    track.getTotalTrackTime(),
+                    i == 0 ? status : "Wait"));
+        }
     }
 
     // Utility methods
@@ -251,7 +200,7 @@ public class AudioListener {
         }
     }
 
-    private static void queue(IChannel channel, InputStream stream, String title)
+    static void queue(IChannel channel, InputStream stream, String title)
             throws RateLimitException, DiscordException, MissingPermissionsException {
         queue(channel, stream, title, null, null);
     }

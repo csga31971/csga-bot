@@ -8,13 +8,10 @@ beep beep
   
 ## Configurations
 
-Add the `moe.properties` file in the `res` directory.
+Add the `moe.properties` in `res` directory.
 
 Attribute Name      | Description
 ------------------- | -------------------
-client.id           | In `APP DETAILS`, your `Client ID`.
-client.secret       | In `APP DETAILS`, your `Client Secret`.
-bot.username        | In `APP BOT USER`, your `Username`.
 bot.token           | In `APP BOT USER`, your `Token`.
 
 ## Building
