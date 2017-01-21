@@ -1,6 +1,7 @@
 package com.moebuff.discord.io;
 
 import com.moebuff.discord.reflect.FieldKit;
+import com.moebuff.discord.utils.Log;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -13,12 +14,16 @@ import java.net.URI;
  * @author muto
  */
 public class FileHandle extends File {
-    private static int DEFAULT_BUFFER_SIZE = 8192;
+    private static int DEFAULT_BUFFER_SIZE = 16384;// 8192 * 2
 
     static {
-        DEFAULT_BUFFER_SIZE = (int) FieldKit.readStaticField(
-                BufferedInputStream.class,
-                "DEFAULT_BUFFER_SIZE");
+        try {
+            DEFAULT_BUFFER_SIZE = (int) FieldKit.readStaticField(
+                    BufferedInputStream.class,
+                    "DEFAULT_BUFFER_SIZE");
+        } catch (Throwable e) {
+            Log.getLogger().debug("", e);
+        }
     }
 
     public FileHandle(String pathname) {
