@@ -51,13 +51,13 @@ public class Command {
                 roll(max);
                 break;
             case "osu":
-                OhShitUninstall.osu(channel, user);
+                OhShitUninstall.osu(channel);
                 break;
             case "join":
                 Audio.join(guild, channel, user);
                 break;
             case "leave":
-                Audio.leave(guild, channel, user);
+                Audio.leave(guild, channel);
                 break;
             case "queueUrl":
                 Audio.queueUrl(channel, String.join(" ", args));

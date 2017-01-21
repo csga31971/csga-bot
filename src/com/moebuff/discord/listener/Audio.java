@@ -2,6 +2,7 @@ package com.moebuff.discord.listener;
 
 import com.moebuff.discord.io.FF;
 import com.moebuff.discord.io.FileHandle;
+import com.moebuff.discord.utils.Log;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
@@ -32,6 +33,7 @@ import java.util.Map;
 public class Audio {
     // Stores the last channel that the join command was sent from
     private static final Map<IGuild, IChannel> LAST_CHANNEL = new HashMap<>();
+    private static final Map<IGuild, IVoiceChannel> LAST_VOICE = new HashMap<>();
 
     private static final String CHROME
             = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) " +
@@ -46,7 +48,7 @@ public class Audio {
     }
 
     @EventSubscriber
-    public void onTrackStart(TrackStartEvent event)
+    public static void onTrackStart(TrackStartEvent event)
             throws RateLimitException, DiscordException, MissingPermissionsException {
         IGuild guild = event.getPlayer().getGuild();
         String msg = String.format("Now playing **%s**.", getTrackTitle(event));
@@ -85,25 +87,38 @@ public class Audio {
                 channel.sendMessage("That room is full!");
             } else {
                 voice.join();
+                LAST_VOICE.put(guild, voice);
                 String msg = String.format("Connected to **%s**.", voice.getName());
                 channel.sendMessage(msg);
             }
         }
     }
 
-    static void leave(IGuild guild, IChannel channel, IUser user)
+    static void leave(IGuild guild, IChannel channel)
             throws RateLimitException, DiscordException, MissingPermissionsException {
-        List<IVoiceChannel> connections = user.getConnectedVoiceChannels();
-        if (connections.size() < 1) {
+        if (!LAST_VOICE.containsKey(guild)) {
+            List<IVoiceChannel> cs = channel.getClient().getConnectedVoiceChannels();
+            for (IVoiceChannel c : cs) {
+                Log.getLogger().trace(c.getName());
+
+                if (c.getGuild() == guild) {
+                    LAST_VOICE.put(guild, c);
+                    leave(guild, channel);
+                    channel.sendMessage("This operation may be delayed or not useful.");
+                    return;
+                }
+            }
+
             channel.sendMessage("I didn't join any channels!");
             return;
         }
 
-        IVoiceChannel voice = connections.get(0);
+        IVoiceChannel voice = LAST_VOICE.get(guild);
         if (voice.isConnected()) {
             player(channel).clean();
-            LAST_CHANNEL.remove(guild);
             voice.leave();
+            LAST_CHANNEL.remove(guild);
+            LAST_VOICE.remove(guild);
             String msg = String.format("Has left the **%s**.", voice.getName());
             channel.sendMessage(msg);
         }
@@ -132,7 +147,7 @@ public class Audio {
         } else if (!audio.canRead()) {
             channel.sendMessage("I don't have access to that file!");
         } else {
-            queue(channel, audio.read(), path, "file", audio);
+            queue(channel, audio.read(0), path, "file", audio);
         }
     }
 
@@ -195,6 +210,7 @@ public class Audio {
             }
         } catch (IOException e) {
             channel.sendMessage("An IO exception occured: " + e.getMessage());
+            Log.getLogger().debug("", e);
         } catch (UnsupportedAudioFileException e) {
             channel.sendMessage("That type of file is not supported!");
         }
