@@ -44,11 +44,7 @@ public class Command {
                 new String[0];
         switch (cmd.substring(1)) {
             case "roll":
-                int max = -1;
-                if (args.length > 0) {
-                    max = Integer.valueOf(args[0]);
-                }
-                roll(max);
+                roll();
                 break;
             case "osu":
                 OhShitUninstall.osu(channel);
@@ -83,9 +79,14 @@ public class Command {
         client.changeStatus(Status.game(cmd));
     }
 
-    private static void roll(int max)
+    private static void roll()
             throws RateLimitException, DiscordException, MissingPermissionsException {
-        int num = RandomUtils.nextInt(0, max > 0 ? max : 100);
+        int max = 100;
+        if (args.length > 0) {
+            max = Integer.valueOf(args[0]);
+        }
+
+        int num = RandomUtils.nextInt(0, max);
         channel.sendMessage(String.format("%s rolls %s point(s).",
                 user.mention(), num));
     }
