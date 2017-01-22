@@ -7,6 +7,8 @@ import sx.blah.discord.util.RateLimitException;
 
 /**
  * OSU Support
+ *
+ * @author muto
  */
 public class OhShitUninstall {
     static void osu(IChannel channel)

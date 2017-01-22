@@ -13,6 +13,8 @@ import java.util.Arrays;
 
 /**
  * 命令行
+ *
+ * @author muto
  */
 public class Command {
     private static final String PREFIX = "%";
@@ -46,9 +48,6 @@ public class Command {
             case "roll":
                 roll();
                 break;
-            case "osu":
-                OhShitUninstall.osu(channel);
-                break;
             case "join":
                 Audio.join(guild, channel, user);
                 break;
@@ -72,6 +71,12 @@ public class Command {
                 break;
             case "list":
                 Audio.list(channel);
+                break;
+            case "osu":
+                OhShitUninstall.osu(channel);
+                break;
+            case "163":
+                NetEase.parse();
                 break;
         }
 
