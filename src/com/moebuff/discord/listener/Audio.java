@@ -72,12 +72,12 @@ public class Audio {
     }
 
     /**
-     * 用于处理额外的参数，这是一组指令集，通常需要再次判断
+     * 用于处理额外的参数，这是一组指令集，通常需要再次判断以确认需要执行的逻辑。
      *
-     * @param guild
-     * @param channel
-     * @param user
-     * @param args
+     * @param guild   当前所在工会
+     * @param channel 当前所在频道
+     * @param user    当前用户
+     * @param args    命令行参数
      */
     static void handle(IGuild guild, IChannel channel, IUser user, String[] args)
             throws RateLimitException, DiscordException, MissingPermissionsException {
@@ -87,7 +87,7 @@ public class Audio {
             return;
         }
 
-        boolean prompt = false;
+        boolean prompt = false;//是否需要提示
         String[] params = args.length > 1 ?
                 Arrays.copyOfRange(args, 1, args.length) :
                 new String[0];
@@ -151,7 +151,14 @@ public class Audio {
     // Audio player methods
     //---------------------------------------------------------------------------------------------
 
-    private static void join(IGuild guild, IChannel channel, IUser user)
+    /**
+     * 加入用户所在的语音频道，若已加入则只更新当前的文字频道。
+     *
+     * @param guild   用户所在工会
+     * @param channel 用户所在的文字频道
+     * @param user    当前用户
+     */
+    public static void join(IGuild guild, IChannel channel, IUser user)
             throws RateLimitException, DiscordException, MissingPermissionsException {
         LAST_CHANNEL.put(guild, channel);
         if (user.getConnectedVoiceChannels().size() < 1) {
@@ -165,7 +172,7 @@ public class Audio {
                 channel.sendMessage("I can't join that voice channel!");
             } else if (userLimit > 0 && voice.getConnectedUsers().size() >= userLimit) {
                 channel.sendMessage("That room is full!");
-            } else {
+            } else if (!our.getConnectedVoiceChannels().contains(voice)) {
                 voice.join();
                 LAST_VOICE.put(guild, voice);
                 String msg = String.format("Connected to **%s**.", voice.getName());
@@ -181,6 +188,7 @@ public class Audio {
             for (IVoiceChannel c : cs) {
                 Log.getLogger().trace(c.getName());
 
+                // 以避免被拉去援交无法自救
                 if (c.getGuild() == guild) {
                     LAST_VOICE.put(guild, c);
                     leave(guild, channel);
@@ -204,7 +212,13 @@ public class Audio {
         }
     }
 
-    private static void queueUrl(IChannel channel, String spec)
+    /**
+     * 发送一个url请求，并将得到的音频加入播放队列
+     *
+     * @param channel 当前所在频道
+     * @param spec    url字符串
+     */
+    public static void queueUrl(IChannel channel, String spec)
             throws RateLimitException, DiscordException, MissingPermissionsException {
         try {
             queueUrl(channel, new URL(spec));
@@ -213,7 +227,7 @@ public class Audio {
         }
     }
 
-    private static void queueUrl(IChannel channel, URL url)
+    public static void queueUrl(IChannel channel, URL url)
             throws RateLimitException, DiscordException, MissingPermissionsException {
         try {
             URLConnection conn = url.openConnection();
@@ -223,11 +237,17 @@ public class Audio {
             String name = FilenameUtils.getName(url.getFile());
             queue(channel, conn.getInputStream(), name, "url", url);
         } catch (IOException e) {
-            channel.sendMessage("URL Connection failed: " + e.getMessage());
+            channel.sendMessage("Connection failed: " + e.getMessage());
         }
     }
 
-    private static void queueFile(IChannel channel, String path)
+    /**
+     * 将从本地音频目录获取的指定文件加入到播放队列
+     *
+     * @param channel 用户当前所在频道
+     * @param path    用于指示音频文件的抽象路径名
+     */
+    public static void queueFile(IChannel channel, String path)
             throws RateLimitException, DiscordException, MissingPermissionsException {
         FileHandle audio = FF.SONGS.child(path);
         if (!audio.exists()) {
@@ -239,7 +259,13 @@ public class Audio {
         }
     }
 
-    private static AudioPlayer player(IChannel channel) {
+    /**
+     * 获取控制当前音频的播放器
+     *
+     * @param channel 用户所在频道
+     * @return 音频播放器
+     */
+    public static AudioPlayer player(IChannel channel) {
         return AudioPlayer.getAudioPlayerForGuild(channel.getGuild());
     }
 
@@ -307,12 +333,19 @@ public class Audio {
             }
         } catch (IOException e) {
             channel.sendMessage("An IO exception occured: " + e.getMessage());
-            Log.getLogger().debug("", e);
+            Log.getLogger().debug(guild.getName(), e);
         } catch (UnsupportedAudioFileException e) {
             channel.sendMessage("That type of file is not supported!");
         }
     }
 
+    /**
+     * 将包含特定音频的输入流加到播放队列
+     *
+     * @param channel 当前所在频道
+     * @param stream  包含音频信息的输入流
+     * @param title   用于显示的标题
+     */
     public static void queue(IChannel channel, InputStream stream, String title)
             throws RateLimitException, DiscordException, MissingPermissionsException {
         queue(channel, stream, title, null, null);
