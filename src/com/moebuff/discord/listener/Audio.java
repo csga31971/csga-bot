@@ -2,6 +2,7 @@ package com.moebuff.discord.listener;
 
 import com.moebuff.discord.io.FF;
 import com.moebuff.discord.io.FileHandle;
+import com.moebuff.discord.reflect.ReflectionUtil;
 import com.moebuff.discord.utils.Log;
 import org.apache.commons.io.FilenameUtils;
 import sx.blah.discord.api.events.EventSubscriber;
@@ -177,6 +178,8 @@ public class Audio {
                 LAST_VOICE.put(guild, voice);
                 String msg = String.format("Connected to **%s**.", voice.getName());
                 channel.sendMessage(msg);
+            } else if (ReflectionUtil.getCallerClass(2) == Audio.class) {
+                channel.sendMessage("Updated to current channel");
             }
         }
     }
@@ -207,7 +210,8 @@ public class Audio {
             voice.leave();
             LAST_CHANNEL.remove(guild);
             LAST_VOICE.remove(guild);
-            String msg = String.format("Has left the **%s**.", voice.getName());
+            channel.sendMessage("Note: The playlist has been cleared.");
+            String msg = String.format("I have left the **%s**.", voice.getName());
             channel.sendMessage(msg);
         }
     }
