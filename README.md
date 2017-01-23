@@ -39,6 +39,10 @@ It contains all necessary code and can be run either by double clicking or on th
 via `java -jar jar-file-name.jar`. Your audience must have a JVM installed for this to work. 
 The JAR will work on Windows, Linux and Mac OS X!
 
+### Other info
+
+You can contact me on the [Ohio State University Server](https://discord.gg/HqVMBFB) in the #csga_bot channel.
+
 ## Licence
 
     Copyright 2016 AltMirrorBell
