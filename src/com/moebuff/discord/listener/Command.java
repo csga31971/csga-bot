@@ -38,45 +38,24 @@ public class Command {
         guild = message.getGuild();
         client = message.getClient();
 
-        String[] content = message.getContent().split(" ");
-        String cmd = content[0];
+        String[] split = message.getContent().split(" ");
+        String cmd = split[0];
         if (!cmd.startsWith(PREFIX)) return;
-        args = content.length > 1 ?
-                Arrays.copyOfRange(content, 1, content.length) :
+        args = split.length > 1 ?
+                Arrays.copyOfRange(split, 1, split.length) :
                 new String[0];
         switch (cmd.substring(1)) {
             case "roll":
                 roll();
                 break;
-            case "join":
-                Audio.join(guild, channel, user);
-                break;
-            case "leave":
-                Audio.leave(guild, channel);
-                break;
-            case "queueUrl":
-                Audio.queueUrl(channel, String.join(" ", args));
-                break;
-            case "queueFile":
-                Audio.queueFile(channel, String.join(" ", args));
-                break;
-            case "play":
-                Audio.player(channel).setPaused(false);
-                break;
-            case "pause":
-                Audio.player(channel).setPaused(true);
-                break;
-            case "skip":
-                Audio.player(channel).skip();
-                break;
-            case "list":
-                Audio.list(channel);
-                break;
-            case "osu":
-                OhShitUninstall.osu(channel);
+            case "vol":
+            case "music":
+            case "au":
+            case "audio":
+                Audio.handle(guild, channel, user, args);
                 break;
             case "163":
-                NetEase.parse();
+                netEase();
                 break;
         }
 
@@ -88,11 +67,22 @@ public class Command {
             throws RateLimitException, DiscordException, MissingPermissionsException {
         int max = 100;
         if (args.length > 0) {
-            max = Integer.valueOf(args[0]);
+            max = Integer.parseInt(args[0]);
         }
 
         int num = RandomUtils.nextInt(0, max);
         channel.sendMessage(String.format("%s rolls %s point(s).",
                 user.mention(), num));
+    }
+
+    /**
+     * 网易云音乐
+     *
+     * @throws RateLimitException
+     * @throws DiscordException
+     * @throws MissingPermissionsException
+     */
+    private static void netEase()
+            throws RateLimitException, DiscordException, MissingPermissionsException {
     }
 }

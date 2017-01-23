@@ -3,6 +3,7 @@ package com.moebuff.discord.listener;
 import com.moebuff.discord.io.FF;
 import com.moebuff.discord.io.FileHandle;
 import com.moebuff.discord.utils.Log;
+import org.apache.commons.io.FilenameUtils;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
@@ -21,6 +22,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @author muto
  */
 public class Audio {
+
     // Stores the last channel that the join command was sent from
     private static final Map<IGuild, IChannel> LAST_CHANNEL = new HashMap<>();
     private static final Map<IGuild, IVoiceChannel> LAST_VOICE = new HashMap<>();
@@ -68,10 +71,87 @@ public class Audio {
         }
     }
 
+    /**
+     * 用于处理额外的参数，这是一组指令集，通常需要再次判断
+     *
+     * @param guild
+     * @param channel
+     * @param user
+     * @param args
+     */
+    static void handle(IGuild guild, IChannel channel, IUser user, String[] args)
+            throws RateLimitException, DiscordException, MissingPermissionsException {
+        if (args.length == 0) {
+            channel.sendMessage("The command requires some additional parameters.");
+            channel.sendMessage("For details, refer to the help documentation.");
+            return;
+        }
+
+        boolean prompt = false;
+        String[] params = args.length > 1 ?
+                Arrays.copyOfRange(args, 1, args.length) :
+                new String[0];
+        switch (args[0]) {
+            case "-j":
+            case "join":
+                Audio.join(guild, channel, user);
+                break;
+            case "-L":
+            case "leave":
+                Audio.leave(guild, channel);
+                break;
+            case "-u":
+            case "url":
+            case "queueUrl":
+                Audio.queueUrl(channel, String.join(" ", params));
+                break;
+            case "-f":
+            case "file":
+            case "queueFile":
+                Audio.queueFile(channel, String.join(" ", params));
+                break;
+            case "-q":
+            case "queue":
+                String address = String.join(" ", params);
+                try {
+                    queueUrl(channel, new URL(address));
+                } catch (MalformedURLException e) {
+                    queueFile(channel, address);
+                }
+                break;
+            case "-pl":
+            case "play":
+                Audio.player(channel).setPaused(false);
+                break;
+            case "-p":
+                if (params.length > 0) {
+                    Audio.player(channel).setPaused(false);
+                    break;
+                }
+                prompt = true;
+            case "pause":
+                Audio.player(channel).setPaused(true);
+
+                // 下面这行代码本应放在上面，之所以这么写，是为了避免因报错导致运行中断
+                if (prompt) {
+                    channel.sendMessage("Just add a parameter can continue to play.");
+                }
+                break;
+            case "-s":
+            case "skip":
+                Audio.player(channel).skip();
+                break;
+            case "-l":
+            case "list":
+                Audio.list(channel);
+                break;
+        }
+    }
+
     // Audio player methods
     //---------------------------------------------------------------------------------------------
 
-    static void join(IGuild guild, IChannel channel, IUser user)
+    private static void join(IGuild guild, IChannel channel, IUser user)
             throws RateLimitException, DiscordException, MissingPermissionsException {
         LAST_CHANNEL.put(guild, channel);
         if (user.getConnectedVoiceChannels().size() < 1) {
@@ -94,7 +174,7 @@ public class Audio {
         }
     }
 
-    static void leave(IGuild guild, IChannel channel)
+    private static void leave(IGuild guild, IChannel channel)
             throws RateLimitException, DiscordException, MissingPermissionsException {
         if (!LAST_VOICE.containsKey(guild)) {
             List<IVoiceChannel> cs = channel.getClient().getConnectedVoiceChannels();
@@ -124,22 +204,30 @@ public class Audio {
         }
     }
 
-    static void queueUrl(IChannel channel, String spec)
+    private static void queueUrl(IChannel channel, String spec)
             throws RateLimitException, DiscordException, MissingPermissionsException {
         try {
-            URL url = new URL(spec);
-            URLConnection conn = url.openConnection();
-            conn.setRequestProperty("Accept", "*/*");
-            conn.setRequestProperty("User-Agent", CHROME);
-            queue(channel, conn.getInputStream(), url.getFile(), "url", url);
+            queueUrl(channel, new URL(spec));
         } catch (MalformedURLException e) {
             channel.sendMessage("That URL is invalid!");
-        } catch (IOException e) {
-            channel.sendMessage("Connection failed: " + e.getMessage());
         }
     }
 
-    static void queueFile(IChannel channel, String path)
+    private static void queueUrl(IChannel channel, URL url)
+            throws RateLimitException, DiscordException, MissingPermissionsException {
+        try {
+            URLConnection conn = url.openConnection();
+            conn.setRequestProperty("Accept", "*/*");
+            conn.setRequestProperty("User-Agent", CHROME);
+
+            String name = FilenameUtils.getName(url.getFile());
+            queue(channel, conn.getInputStream(), name, "url", url);
+        } catch (IOException e) {
+            channel.sendMessage("URL Connection failed: " + e.getMessage());
+        }
+    }
+
+    private static void queueFile(IChannel channel, String path)
             throws RateLimitException, DiscordException, MissingPermissionsException {
         FileHandle audio = FF.SONGS.child(path);
         if (!audio.exists()) {
@@ -151,20 +239,20 @@ public class Audio {
         }
     }
 
-    static AudioPlayer player(IChannel channel) {
+    private static AudioPlayer player(IChannel channel) {
         return AudioPlayer.getAudioPlayerForGuild(channel.getGuild());
     }
 
-    static void list(IChannel channel)
+    private static void list(IChannel channel)
             throws RateLimitException, DiscordException, MissingPermissionsException {
-        AudioPlayer player = player(channel);
-        List<AudioPlayer.Track> list = player.getPlaylist();
+        AudioPlayer ap = player(channel);
+        List<AudioPlayer.Track> list = ap.getPlaylist();
         if (list.size() == 0) {
             channel.sendMessage("No currently playing content.");
             return;
         }
 
-        String status = player.isPaused() ? "Paused" : "Playing";
+        String status = ap.isPaused() ? "Paused" : "Playing";
         for (int i = 0; i < list.size(); i++) {
             AudioPlayer.Track track = list.get(i);
             String title = (String) track.getMetadata().get("title");
@@ -200,9 +288,18 @@ public class Audio {
     private static void queue(IChannel channel, InputStream stream, String title,
                               String key, Object value)
             throws RateLimitException, DiscordException, MissingPermissionsException {
+        IGuild guild = channel.getGuild();
+        if (!LAST_CHANNEL.containsKey(guild)) {
+            channel.sendMessage("First, execute the ***join*** command.");
+            channel.sendMessage("Then run this command again.");
+            channel.sendMessage("Don't forget the command prefix.");
+            return;
+        }
+
         try {
             AudioInputStream audio = AudioSystem.getAudioInputStream(stream);
             AudioPlayer.Track track = player(channel).queue(audio);
+
             Map<String, Object> metadata = track.getMetadata();
             metadata.put("title", title);
             if (key != null) {
@@ -216,8 +313,9 @@ public class Audio {
         }
     }
 
-    static void queue(IChannel channel, InputStream stream, String title)
+    public static void queue(IChannel channel, InputStream stream, String title)
             throws RateLimitException, DiscordException, MissingPermissionsException {
         queue(channel, stream, title, null, null);
     }
+
 }
