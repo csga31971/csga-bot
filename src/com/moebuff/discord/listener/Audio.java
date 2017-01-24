@@ -4,6 +4,7 @@ import com.moebuff.discord.io.FF;
 import com.moebuff.discord.io.FileHandle;
 import com.moebuff.discord.reflect.ReflectionUtil;
 import com.moebuff.discord.utils.Log;
+import com.moebuff.discord.utils.URLUtils;
 import org.apache.commons.io.FilenameUtils;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.obj.*;
@@ -238,7 +239,7 @@ public class Audio {
             conn.setRequestProperty("Accept", "*/*");
             conn.setRequestProperty("User-Agent", CHROME);
 
-            String name = FilenameUtils.getName(url.getFile());
+            String name = FilenameUtils.getName(URLUtils.decode(url::getFile));
             queue(channel, conn.getInputStream(), name, "url", url);
         } catch (IOException e) {
             channel.sendMessage("Connection failed: " + e.getMessage());

@@ -15,7 +15,6 @@ import sx.blah.discord.util.RateLimitException;
  * @author muto
  */
 public class Withdraw {
-
     @EventSubscriber
     public static void onMessageDelete(MessageDeleteEvent event)
             throws RateLimitException, DiscordException, MissingPermissionsException {
@@ -31,5 +30,4 @@ public class Withdraw {
                 message.getChannel().getName());
         user.getOrCreatePMChannel().sendMessage(msg);
     }
-
 }
