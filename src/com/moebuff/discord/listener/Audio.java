@@ -345,7 +345,7 @@ public class Audio {
     }
 
     /**
-     * 将包含特定音频的输入流加到播放队列
+     * 将包含特定音频的输入流加到播放队列，支持标题自定义。
      *
      * @param channel 当前所在频道
      * @param stream  包含音频信息的输入流
