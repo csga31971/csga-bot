@@ -14,7 +14,8 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
  * @author muto
  */
 public class Settings {
-    public static final String TOKEN;
+    public static final String BOT_TOKEN;
+    public static final String URL_AGENT;
 
     static {
         Parameters params = new Parameters();
@@ -26,7 +27,8 @@ public class Settings {
 
         try {
             Configuration config = builder.getConfiguration();
-            TOKEN = config.getString("bot.token");
+            BOT_TOKEN = config.getString("bot.token");
+            URL_AGENT = config.getString("url.agent");
         } catch (ConfigurationException e) {
             throw new UnhandledException(e);
         }

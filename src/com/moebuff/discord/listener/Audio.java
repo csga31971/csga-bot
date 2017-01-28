@@ -1,11 +1,14 @@
 package com.moebuff.discord.listener;
 
+import com.moebuff.discord.Settings;
 import com.moebuff.discord.io.FF;
 import com.moebuff.discord.io.FileHandle;
 import com.moebuff.discord.reflect.ReflectionUtil;
 import com.moebuff.discord.utils.Log;
+import com.moebuff.discord.utils.OS;
 import com.moebuff.discord.utils.URLUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
@@ -35,14 +38,9 @@ import java.util.Map;
  * @author muto
  */
 public class Audio {
-
     // Stores the last channel that the join command was sent from
     private static final Map<IGuild, IChannel> LAST_CHANNEL = new HashMap<>();
     private static final Map<IGuild, IVoiceChannel> LAST_VOICE = new HashMap<>();
-
-    private static final String CHROME
-            = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) " +
-            "Chrome/55.0.2883.87 Safari/537.36";
 
     @EventSubscriber
     public static void onTrackQueue(TrackQueueEvent event)
@@ -236,8 +234,8 @@ public class Audio {
             throws RateLimitException, DiscordException, MissingPermissionsException {
         try {
             URLConnection conn = url.openConnection();
+            conn.setRequestProperty("User-Agent", Settings.URL_AGENT);
             conn.setRequestProperty("Accept", "*/*");
-            conn.setRequestProperty("User-Agent", CHROME);
 
             String name = FilenameUtils.getName(URLUtils.decode(url::getFile));
             queue(channel, conn.getInputStream(), name, "url", url);
@@ -286,11 +284,11 @@ public class Audio {
         String status = ap.isPaused() ? "Paused" : "Playing";
         for (int i = 0; i < list.size(); i++) {
             AudioPlayer.Track track = list.get(i);
-            String title = (String) track.getMetadata().get("title");
             channel.sendMessage(String.format("%s.%s [%s] %s",
                     i + 1,
-                    title,
-                    track.getTotalTrackTime(),
+                    track.getMetadata().get("title"),
+                    DateFormatUtils.formatUTC(track.getCurrentTrackTime(),
+                            OS.DEFAULT_TIME_PATTERN),
                     i == 0 ? status : "Wait"));
         }
     }
@@ -355,5 +353,4 @@ public class Audio {
             throws RateLimitException, DiscordException, MissingPermissionsException {
         queue(channel, stream, title, null, null);
     }
-
 }

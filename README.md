@@ -13,6 +13,7 @@ Add the `moe.properties` in `res` directory.
 Attribute Name      | Description
 ------------------- | -------------------
 bot.token           | In `APP BOT USER`, your `Token`.
+url.agent           | User-Agent, the HTTP request header.
 
 ## Building
 

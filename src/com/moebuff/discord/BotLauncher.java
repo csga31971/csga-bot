@@ -22,7 +22,7 @@ public class BotLauncher implements IListener<ReadyEvent> {
 
     public static void main(String[] args) throws DiscordException {
         Log.getLogger().info("Logging bot in...");
-        client = new ClientBuilder().withToken(Settings.TOKEN).build();
+        client = new ClientBuilder().withToken(Settings.BOT_TOKEN).build();
         client.login();
 
         dispatcher = client.getDispatcher();
