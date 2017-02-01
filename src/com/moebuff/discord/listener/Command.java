@@ -1,5 +1,7 @@
 package com.moebuff.discord.listener;
 
+import com.moebuff.discord.AccessControl;
+import com.moebuff.discord.PermissionException;
 import org.apache.commons.lang3.RandomUtils;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
@@ -26,7 +28,7 @@ public class Command {
     private static String[] args;
 
     @EventSubscriber
-    public static void onMessage(MessageReceivedEvent event)
+    public static void onMessageReceived(MessageReceivedEvent event)
             throws RateLimitException, DiscordException, MissingPermissionsException {
         message = event.getMessage();
         user = message.getAuthor();
@@ -54,10 +56,24 @@ public class Command {
             case "163":
                 netEase();
                 break;
+            case "off":
+            case "exit":
+                AccessControl auth = new AccessControl(user);
+                try {
+                    auth.contains(guild, Permissions.ADMINISTRATOR);
+                    channel.sendMessage("Shutdown in progress.");
+                    System.exit(0);
+                } catch (PermissionException e) {
+                    channel.sendMessage(e.getMessage());
+                }
+                break;
+            default:
+                message.getClient().changeStatus(Status.game(cmd));
+                break;
         }
 
-        // Display the last command
-        message.getClient().changeStatus(Status.game(cmd));
+        // TODO: 命令行模式，摆脱对if和switch的依赖
+
     }
 
     private static void roll()
@@ -74,8 +90,8 @@ public class Command {
     /**
      * 网易云音乐
      *
-     * @throws RateLimitException          请求过于频繁
-     * @throws DiscordException            消息未发送
+     * @throws RateLimitException          过于频繁
+     * @throws DiscordException            其它原因
      * @throws MissingPermissionsException 没有权限
      */
     private static void netEase()

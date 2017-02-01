@@ -43,8 +43,8 @@ dependencies {
     compile "commons-codec:commons-codec:1.10"
     compile "org.apache.commons:commons-lang3:3.4"
     compile "commons-io:commons-io:2.5"
-    compile "commons-beanutils:commons-beanutils:1.9.3"
     compile "org.apache.commons:commons-configuration2:2.1"
+    compile "commons-beanutils:commons-beanutils:1.9.3"
     compileOnly "org.projectlombok:lombok:1.16.12"
     compile "org.slf4j:slf4j-api:1.7.21"
     compile "org.apache.logging.log4j:log4j-api:2.7"
@@ -52,4 +52,5 @@ dependencies {
     compile "org.apache.logging.log4j:log4j-slf4j-impl:2.7"
     compile "com.lmax:disruptor:3.3.6"
     compile "com.github.austinv11:Discord4j:2.6.1"
+    compile 'com.google.code.gson:gson:2.8.0'
 }

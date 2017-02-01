@@ -21,8 +21,8 @@ public class FileHandle extends File {
             DEFAULT_BUFFER_SIZE = (int) FieldKit.readStaticField(
                     BufferedInputStream.class,
                     "DEFAULT_BUFFER_SIZE");
-        } catch (Throwable e) {
-            Log.getLogger().debug("", e);
+        } catch (Throwable ignored) {
+            Log.getLogger().debug("", ignored);
         }
     }
 

@@ -10,7 +10,7 @@ import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
 /**
- * 默认情况下，删除消息是没有任何提示的，这里借鉴了腾讯的做法
+ * 删除（撤回）提示。默认情况下，删除消息是没有任何提示的，这里借鉴了腾讯的做法。
  *
  * @author muto
  */
