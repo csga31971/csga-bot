@@ -53,4 +53,5 @@ dependencies {
     compile "com.lmax:disruptor:3.3.6"
     compile "com.github.austinv11:Discord4j:2.6.1"
     compile 'com.google.code.gson:gson:2.8.0'
+    compile 'com.vdurmont:emoji-java:3.1.3'
 }

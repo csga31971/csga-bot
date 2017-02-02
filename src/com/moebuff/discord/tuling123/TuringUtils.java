@@ -27,11 +27,11 @@ public class TuringUtils {
     /**
      * 向后台发送 post 请求
      *
-     * @param url  请求地址
-     * @param data 参数
-     * @return 结果
+     * @param url   请求地址
+     * @param param 请求参数
+     * @return 请求结果
      */
-    public static String post(String url, String data) {
+    public static String post(String url, String param) {
         URL realUrl = URLUtils.create(url);
         HttpURLConnection conn = URLUtils.openConnection(realUrl);
         conn.setDoOutput(true);
@@ -47,7 +47,7 @@ public class TuringUtils {
             conn.setRequestMethod("POST");
             conn.connect();
 
-            IOKit.write(data, conn.getOutputStream());
+            IOKit.write(param, conn.getOutputStream());
             return IOKit.toString(conn.getInputStream());
         } catch (IOException e) {
             throw new UnhandledException(e);
