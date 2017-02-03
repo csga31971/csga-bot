@@ -80,7 +80,9 @@ public class TuringUtils {
         String encrypt(String data) {
             try {
                 cipher.init(Cipher.ENCRYPT_MODE, key, iv);
-                return Base64.encodeBase64String(data.getBytes(StandardCharsets.UTF_8));
+                return Base64.encodeBase64String(
+                        cipher.doFinal(data.getBytes(StandardCharsets.UTF_8))
+                );
             } catch (GeneralSecurityException e) {
                 throw new UnhandledException(e);
             }

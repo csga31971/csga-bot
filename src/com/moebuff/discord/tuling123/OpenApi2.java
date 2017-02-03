@@ -7,7 +7,6 @@ import com.google.gson.JsonObject;
 import com.moebuff.discord.utils.JsonUtils;
 import com.moebuff.discord.utils.Log;
 import com.moebuff.discord.utils.Operation;
-import org.apache.commons.lang3.time.DateFormatUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,13 +23,12 @@ public class OpenApi2 implements ITuring {
     //混淆协议 - 加密
     private class SecretRequest {
         private String key;
-        private String timestamp;
+        private long timestamp;
         private String data;
 
         SecretRequest(String data) {
             key = apiKey;
-            timestamp = DateFormatUtils.format(System.currentTimeMillis(),
-                    "yyyySSSmmHHssMMdd");
+            timestamp = System.currentTimeMillis();
             this.data = TuringUtils.aes(
                     Operation.md5Hex(secret + timestamp + apiKey),
                     data);
@@ -47,6 +45,7 @@ public class OpenApi2 implements ITuring {
     //上下文语境 - 对话内容
     private class Context extends BaseIssue {
         private Gson gson;
+        private JsonUtils utils;
         private JsonObject req;
         private JsonObject res;
 
@@ -59,11 +58,12 @@ public class OpenApi2 implements ITuring {
         Context(Issue issue) {
             super(issue);
             gson = new GsonBuilder().serializeNulls().create();
+            utils = new JsonUtils(gson);
             req = new JsonObject();
 
-            JsonUtils.addProperty(req, "perception.inputText.text", info);
-            JsonUtils.addProperty(req, "userInfo.apiKey", apiKey);
-            JsonUtils.addProperty(req, "userInfo.userId", userId);
+            utils.setElement(req, "perception.inputText.text", info);
+            utils.setElement(req, "userInfo.apiKey", apiKey);
+            utils.setElement(req, "userInfo.userId", userId);
         }
 
         @Override
@@ -103,7 +103,7 @@ public class OpenApi2 implements ITuring {
             return code == 0;
         }
 
-        String getCodeInfo() {
+        String getMessage() {
             if (code == 5000) return "暂不支持该功能";
             if (code == 6000) return "暂不支持该功能";
             if (code == 4000) return "请求参数格式错误";
@@ -135,11 +135,12 @@ public class OpenApi2 implements ITuring {
     public Issue talk(Issue issue) throws TuringException {
         Context context = new Context(issue);
         String param = new SecretRequest(context.getRequest()).getJson();
+        Log.getLogger().debug(param);//打印加密后的参数
         String result = TuringUtils.post(ADDRESS, param);
 
         Issue response = context.getResponse(result);
         if (!context.noProblem()) {
-            throw new TuringException(context.getCodeInfo());
+            throw new TuringException(context.getMessage());
         }
         return response;
     }
