@@ -62,6 +62,7 @@ public class OpenApi2 implements ITuring {
             req = new JsonObject();
 
             utils.setElement(req, "perception.inputText.text", info);
+            utils.setElement(req, "perception.selfInfo", null);
             utils.setElement(req, "userInfo.apiKey", apiKey);
             utils.setElement(req, "userInfo.userId", userId);
         }
