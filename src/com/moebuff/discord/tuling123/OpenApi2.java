@@ -6,7 +6,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.moebuff.discord.utils.JsonUtils;
 import com.moebuff.discord.utils.Log;
-import com.moebuff.discord.utils.Operation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,38 +15,14 @@ import java.util.List;
  *
  * @author muto
  */
-public class OpenApi2 implements ITuring {
+@Deprecated
+public class OpenApi2 extends BaseApi {
 
     private static final String ADDRESS = "http://openapi.tuling123.com/openapi/api/v2";
 
-    //混淆协议 - 加密
-    private class SecretRequest {
-        private String key;
-        private long timestamp;
-        private String data;
-
-        SecretRequest(String data) {
-            key = apiKey;
-            timestamp = System.currentTimeMillis();
-            this.data = TuringUtils.aes(
-                    Operation.md5Hex(secret + timestamp + apiKey),
-                    data);
-
-            //打印请求参数
-            Log.getLogger().debug(data);
-        }
-
-        String getJson() {
-            return new Gson().toJson(this);
-        }
-    }
-
-    //上下文语境 - 对话内容
-    private class Context extends BaseIssue {
+    private class Context2 extends ContextAbstract {
         private Gson gson;
         private JsonUtils utils;
-        private JsonObject req;
-        private JsonObject res;
 
         private int code;
         private JsonArray results;
@@ -55,31 +30,26 @@ public class OpenApi2 implements ITuring {
         private List<JsonObject> news = new ArrayList<>();
         private JsonObject text;
 
-        Context(Issue issue) {
+        Context2(Issue issue) {
             super(issue);
+
             gson = new GsonBuilder().serializeNulls().create();
             utils = new JsonUtils(gson);
-            req = new JsonObject();
+        }
 
+        @Override
+        String getRequest() {
+            JsonObject req = new JsonObject();
             utils.setElement(req, "perception.inputText.text", info);
             utils.setElement(req, "perception.selfInfo", null);
             utils.setElement(req, "userInfo.apiKey", apiKey);
             utils.setElement(req, "userInfo.userId", userId);
-        }
-
-        @Override
-        public String getAnswer() {
-            return JsonUtils.getElement(text, "values.text").getAsString();
-        }
-
-        String getRequest() {
             return gson.toJson(req);
         }
 
-        Issue getResponse(String json) {
-            Log.getLogger().debug(json);//打印响应结果
-            res = gson.fromJson(json, JsonObject.class);
-
+        @Override
+        void setResponse(String json) {
+            JsonObject res = gson.fromJson(json, JsonObject.class);
             code = JsonUtils.getElement(res, "intent.code").getAsInt();
             try {
                 results = JsonUtils.getElement(res, "results");
@@ -94,16 +64,18 @@ public class OpenApi2 implements ITuring {
                         text = object;//文本
                     }
                 });
+                answer = JsonUtils.getElement(text, "values.text").getAsString();
             } catch (ClassCastException ignored) {
                 Log.getLogger().debug("", ignored);
             }
-            return this;
         }
 
+        @Override
         boolean noProblem() {
             return code == 0;
         }
 
+        @Override
         String getMessage() {
             if (code == 5000) return "暂不支持该功能";
             if (code == 6000) return "暂不支持该功能";
@@ -124,25 +96,23 @@ public class OpenApi2 implements ITuring {
         }
     }
 
-    private String apiKey;
-    private String secret;
-
     OpenApi2(String apiKey, String secret) {
-        this.apiKey = apiKey;
-        this.secret = secret;
+        super(apiKey, secret);
     }
 
     @Override
-    public Issue talk(Issue issue) throws TuringException {
-        Context context = new Context(issue);
-        String param = new SecretRequest(context.getRequest()).getJson();
-        Log.getLogger().debug(param);//打印加密后的参数
-        String result = TuringUtils.post(ADDRESS, param);
+    ContextAbstract toContext(Issue issue) {
+        return new Context2(issue);
+    }
 
-        Issue response = context.getResponse(result);
-        if (!context.noProblem()) {
-            throw new TuringException(context.getMessage());
-        }
-        return response;
+    @Override
+    String getUrl() {
+        return ADDRESS;
+    }
+
+    @Override
+    boolean isAvailable() {
+//        return true;
+        return false;//废弃，文档有误
     }
 }
