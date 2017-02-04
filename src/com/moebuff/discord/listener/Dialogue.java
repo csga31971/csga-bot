@@ -43,10 +43,9 @@ public class Dialogue {
         IChannel channel = message.getChannel();
         IDiscordClient client = message.getClient();
         Issue issue = TuringFactory.getIssue(user);
-        String content = message.getContent();//需去除艾特
-        String mention = client.getOurUser().mention(content.startsWith("<@!"));
-        issue.ask(content.replace(mention, "").trim());
+        issue.ask(message.getContent());
 
+        channel.setTypingStatus(true);//正在输入，回复后自动取消
         ITuring turing = TuringFactory.getApi();
         try {
             issue = turing.talk(issue);

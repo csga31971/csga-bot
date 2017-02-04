@@ -2,7 +2,9 @@ package com.moebuff.discord.tuling123;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.apache.commons.lang3.RandomUtils;
 
 /**
  * WEB API
@@ -35,6 +37,18 @@ public class OpenApi extends BaseApi {
                     .fromJson(json, JsonObject.class);
             code = res.get("code").getAsInt();
             answer = res.get("text").getAsString();
+
+            String add = "\n";//附加信息
+            if (code == 200000) {
+                add += res.get("url").getAsString();
+
+            } else if (code == 302000 || code == 308000) {
+                JsonArray array = res.get("list").getAsJsonArray();
+                int index = RandomUtils.nextInt(0, array.size());
+                JsonObject object = array.get(index).getAsJsonObject();
+                add += object.get("detailurl").getAsString();
+            }
+            answer += add.length() > 1 ? add : "";
         }
 
         @Override
