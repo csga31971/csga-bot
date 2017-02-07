@@ -3,6 +3,7 @@ package com.moebuff.discord.io;
 import com.moebuff.discord.reflect.FieldKit;
 import com.moebuff.discord.reflect.MemberUtils;
 import com.moebuff.discord.utils.UnhandledException;
+import org.apache.commons.io.FilenameUtils;
 
 import java.lang.reflect.Field;
 
@@ -18,7 +19,7 @@ public class FF {
     public static final FileHandle ROOT;
 
     static {
-        ROOT = new FileHandle(".csga-bot");
+        ROOT = new FileHandle(FileKit.RUNTIMEDIR, ".csga-bot");
 
         for (Field f : FF.class.getFields()) {
             if (MemberUtils.isFinal(f)) continue;
@@ -31,5 +32,12 @@ public class FF {
             //是关掉Instant Run，具体位置在File->Settings->Build,Execution,Deployment->Instant Run
             FieldKit.writeField(f, null, dir);
         }
+    }
+
+    /**
+     * @return 根目录规范化的绝对路径名字符串
+     */
+    public static String getRootCanonicalPath() {
+        return FilenameUtils.getFullPathNoEndSeparator(FileKit.getAbsolutePath(ROOT));
     }
 }

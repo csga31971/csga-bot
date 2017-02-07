@@ -1,5 +1,6 @@
 package com.moebuff.discord.utils;
 
+import com.moebuff.discord.io.FF;
 import com.moebuff.discord.reflect.ReflectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +50,10 @@ public class Log {
 
         // Support StringFormattedMessage and ParameterizedMessage
         System.setProperty("log4j2.messageFactory", LOG4J_FORMAT_MESSAGE_FACTORY);
+
+        // System Properties Lookup
+        // Root directory for generating log files
+        System.setProperty("LogParentDirectory", FF.getRootCanonicalPath());
     }
 
     public static Logger getLogger() {

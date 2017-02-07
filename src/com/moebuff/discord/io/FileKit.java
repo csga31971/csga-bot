@@ -18,16 +18,22 @@ public class FileKit {
     public static final File WKINGDIR = new File("").getAbsoluteFile();
 
     /**
+     * 运行时目录，与工作目录的区别在于，命令行中执行jar时，获取的是jar文件所在的目录，并非执行jar的目录。
+     */
+    public static final File RUNTIMEDIR = OS.isJar ?
+            new File(FilenameUtils.getFullPath(OS.classpath)) : WKINGDIR;
+
+    /**
      * 获取内部资源，该资源位于 working directory 中；若运行的是jar，则从jar中获取。
      *
      * @param path 所需资源的路径
      * @return 指示该资源的 {@link File} 对象
      */
     public static File getResource(String path) {
-        if (isDirectory(OS.location)) {
-            return new File(WKINGDIR, path);
+        if (OS.isJar) {
+            return new ZipPackage(OS.classpath).child(path);
         }
-        return new ZipPackage(OS.classpath).child(path);
+        return new File(WKINGDIR, path);
     }
 
     /**
@@ -123,7 +129,7 @@ public class FileKit {
      *
      * @see FilenameUtils#concat(String, String)
      */
-    public static String getCanonicalPath(File f) {
+    public static String getPath(File f) {
         return FilenameUtils.concat(f.getPath(), "");
     }
 
