@@ -21,7 +21,7 @@ public class FileKit {
      * 运行时目录，与工作目录的区别在于，命令行中执行jar时，获取的是jar文件所在的目录，并非执行jar的目录。
      */
     public static final File RUNTIMEDIR = OS.isJar ?
-            new File(FilenameUtils.getFullPath(OS.classpath)) : WKINGDIR;
+            new File(FilenameUtils.getFullPath(OS.location)) : WKINGDIR;
 
     /**
      * 获取内部资源，该资源位于 working directory 中；若运行的是jar，则从jar中获取。
@@ -31,7 +31,7 @@ public class FileKit {
      */
     public static File getResource(String path) {
         if (OS.isJar) {
-            return new ZipPackage(OS.classpath).child(path);
+            return new ZipPackage(OS.location).child(path);
         }
         return new File(WKINGDIR, path);
     }
