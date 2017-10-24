@@ -18,6 +18,7 @@ public class Settings {
     public static final String URL_AGENT;
     public static final String TL_APIKEY;
     public static final String TL_SECRET;
+    public static final String OSU_APIKEY;
 
     static {
         Parameters params = new Parameters();
@@ -32,6 +33,7 @@ public class Settings {
             URL_AGENT = config.getString("url.agent");
             TL_APIKEY = config.getString("tl.APIkey");
             TL_SECRET = config.getString("tl.secret");
+            OSU_APIKEY = config.getString("osu.apikey");
         } catch (ConfigurationException e) {
             throw new UnhandledException(e);
         }
