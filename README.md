@@ -16,6 +16,7 @@ bot.token           | In `APP BOT USER`, your `Token`.
 url.agent           | User-Agent, the HTTP request header.
 tl.APIkey           | [TURING RoBot](http://www.tuling123.com/) APIkey.
 tl.secret           | Used to generate the AES key.
+osu.apikey          | [osu!](https://osu.ppy.sh/p/api) APIkey.
 
 ## Building
 
