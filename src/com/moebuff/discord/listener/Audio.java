@@ -161,18 +161,34 @@ public class Audio {
     public static void join(IGuild guild, IChannel channel, IUser user)
             throws RateLimitException, DiscordException, MissingPermissionsException {
         LAST_CHANNEL.put(guild, channel);
-        if (user.getConnectedVoiceChannels().size() < 1) {
+        
+        List<IVoiceChannel> voiceChannels = guild.getVoiceChannels();
+        IVoiceChannel voice  = guild.getAFKChannel();//default
+        boolean isInVoiceChannel = false;
+        
+        for(IVoiceChannel v : voiceChannels){
+            List<IUser> users = v.getConnectedUsers();
+            if(users.contains(user)){
+                isInVoiceChannel = true;
+                voice = v;
+            }
+            /*for(IUser u : users){
+                if (u.getStringID().equals(user.getStringID())) {
+                   isInVoiceChannel = true;
+                    voice = v;
+                }
+            }*/
+        }
+        if (!isInVoiceChannel) {
             channel.sendMessage("You aren't in a voice channel!");
         } else {
             IUser our = channel.getClient().getOurUser();
-            IVoiceChannel voice = user.getConnectedVoiceChannels().get(0);
             int userLimit = voice.getUserLimit();
-
             if (!voice.getModifiedPermissions(our).contains(Permissions.VOICE_CONNECT)) {
                 channel.sendMessage("I can't join that voice channel!");
             } else if (userLimit > 0 && voice.getConnectedUsers().size() >= userLimit) {
                 channel.sendMessage("That room is full!");
-            } else if (!our.getConnectedVoiceChannels().contains(voice)) {
+            } else if (voice.getConnectedUsers().contains(our)) {
                 voice.join();
                 LAST_VOICE.put(guild, voice);
                 String msg = String.format("Connected to **%s**.", voice.getName());
