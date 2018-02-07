@@ -1,9 +1,6 @@
-﻿package com.moebuff.discord.utils;
+package com.moebuff.discord.utils;
 
 import com.google.gson.*;
-import com.moebuff.discord.oppai.Koohii;
-import org.json.JSONObject;
-import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
 
 import javax.crypto.Cipher;
