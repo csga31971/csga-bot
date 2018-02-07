@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.moebuff.discord.dao.GiftDAO">
+    <resultMap id="gift" type="com.moebuff.discord.entity.Gift">
+        <id column="id" property="id"></id>
+        <result column="name" property="name"></result>
+        <result column="price" property="price"></result>
+        <result column="charm" property="charm"></result>
+    </resultMap>
+
+    <select id="getGiftList" resultMap="gift">
+        select * from gift
+    </select>
+    <select id="getGift" parameterType="int" resultType="com.moebuff.discord.entity.Gift">
+        select * from gift where id = #{id}
+    </select>
+    <update id="addCharmPoint" parameterType="java.util.Map">
+        update user set charmPoint = (#{receiver.charmPoint}+#{gift.charm}) where userid = #{receiver.userid}
+    </update>
+    <update id="addRichPoint" parameterType="java.util.Map">
+        update user set richPoint = (#{sender.richPoint}+#{gift.price}) where userid = #{sender.userid}
+    </update>
+    <update id="subMoney" parameterType="java.util.Map">
+        update user set money = (#{sender.money}-#{gift.price}) where userid = #{sender.userid}
+    </update>
+    <insert id="addLog" parameterType="java.util.Map">
+        insert into gift_log values(#{sender.userid}, #{receiver.userid}, #{date}, #{gift.id})
+    </insert>
+</mapper>
