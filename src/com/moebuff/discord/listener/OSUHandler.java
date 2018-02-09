@@ -262,7 +262,6 @@ public class OSUHandler {
                     .appendField("Ranked Score: ", ranked_score, false)
                     .appendField("Total Score: ",total_score,true)
                     .appendField("Level:", level, true)
-                    .appendField("1",count_rank_ss,true)
                     .build();
             channel.sendMessage(embedObject);
         }

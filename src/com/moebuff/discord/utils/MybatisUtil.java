@@ -9,10 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class MybatisUtil {
-
     private static SqlSessionFactory sqlSessionFactory;
-
-    public static SqlSession getSession(){
+    static{
         String resource = "mybatis.xml";
         try {
             InputStream inputStream = Resources.getResourceAsStream(resource);
@@ -20,6 +18,8 @@ public class MybatisUtil {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    public static SqlSession getSession(){
         return sqlSessionFactory.openSession();
     }
 }
