@@ -14,11 +14,14 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
  * @author muto
  */
 public class Settings {
+
     public static final String BOT_TOKEN;
     public static final String URL_AGENT;
     public static final String TL_APIKEY;
     public static final String TL_SECRET;
     public static final String OSU_APIKEY;
+    public static final String BOT_ID_STRING = "270475536533291008";
+    public static final String PREFIX = "%";
 
     static {
         Parameters params = new Parameters();

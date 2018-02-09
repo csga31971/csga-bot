@@ -98,3 +98,6 @@ gradle-app.setting
 res/moe.properties
 .csga-bot
 classes
+res/db.properties
+res/META-INF/MANIFEST.MF
+META-INF/MANIFEST.MF

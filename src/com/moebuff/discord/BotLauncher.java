@@ -9,7 +9,6 @@ import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.Status;
 import sx.blah.discord.util.DiscordException;
 
 import java.util.List;
@@ -38,6 +37,6 @@ public class BotLauncher implements IListener<ReadyEvent> {
         List<IUser> users = client.getUsers();
         int index = RandomUtils.nextInt(0, users.size());
         String name = users.get(index).getName();
-        client.changeStatus(Status.game(name));
+        client.changePlayingText(name);
     }
 }

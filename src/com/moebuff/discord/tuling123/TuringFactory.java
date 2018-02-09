@@ -23,7 +23,7 @@ public class TuringFactory {
     }
 
     public static Issue getIssue(IUser user) {
-        return new BaseIssue(user.getID());
+        return new BaseIssue(user.getStringID());
     }
 
     public static ITuring getApi() {

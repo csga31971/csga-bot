@@ -18,6 +18,8 @@ tl.APIkey           | [TURING RoBot](http://www.tuling123.com/) APIkey.
 tl.secret           | Used to generate the AES key.
 osu.apikey          | [osu!](https://osu.ppy.sh/p/api) APIkey.
 
+Add your Database properties in `res/db.properties`.
+
 ## Building
 
 This project use [Lombok](https://projectlombok.org/) to generate getters and setters.

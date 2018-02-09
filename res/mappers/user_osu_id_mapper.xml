@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.moebuff.discord.dao.User_osu_id_DAO">
+    <select id="getosuid" parameterType="java.lang.String" resultType="java.lang.String">
+        select osuid from user_osu_id where userid = #{userid}
+    </select>
+    <insert id="setosuid" parameterType="java.util.Map">
+        insert into user_osu_id values(#{userid},#{osuid})
+    </insert>
+</mapper>
