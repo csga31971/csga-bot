@@ -47,21 +47,29 @@ public class CloudMusic {
             case "search":
             case "s":
                 getSongsByName(param_with_spacebar);
+                break;
             case "play":
+            case "p":
                 playSong(Integer.valueOf(params[0]));
+                break;
+            default:
+                channel.sendMessage("unknown command.");
+                break;
         }
     }
 
     static void getSongsByName(String name){
         Log.getLogger().info("requested song name:" + name);
         JsonArray songs = CloudMusicUtils.searchSong(name);
-        Log.getLogger().info("songs:" + songs.toString());
+        //Log.getLogger().info("songs:" + songs.toString());
         int count = 0;
         String msg = "Result: \n";
         for(JsonElement jsonElement:songs){
             JsonObject song = jsonElement.getAsJsonObject();
             song_ID[count] = song.get("privilege").getAsJsonObject().get("id").getAsInt();
             if(count<10){
+                count++;
+                msg += count + ". ";
                 JsonArray artists = song.get("ar").getAsJsonArray();
                 for(JsonElement jsonElement1:artists){
                     JsonObject artist = jsonElement1.getAsJsonObject();
@@ -70,9 +78,6 @@ public class CloudMusic {
                 }
                 msg = msg.substring(0,msg.lastIndexOf('&'));
                 msg += "  --  ";
-
-                count++;
-                msg += count + ". ";
                 msg += song.get("name").getAsString();
                 msg += "\n";
             }

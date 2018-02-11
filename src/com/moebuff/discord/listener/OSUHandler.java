@@ -59,6 +59,7 @@ public class OSUHandler {
                 }
                 break;
             case "recent":
+            case "r":
                 try {
                     OSURecent(channel, user, message);
                 } catch (IOException e) {
@@ -66,6 +67,7 @@ public class OSUHandler {
                 }
                 break;
             case "profile":
+            case "p":
                 try {
                     OSUProfile(channel, user, message);
                 } catch (IOException e) {
@@ -218,7 +220,6 @@ public class OSUHandler {
             JsonElement ele = jsonArray.get(0);
             JsonObject obj = ele.getAsJsonObject();
 
-
             String userid = obj.get("user_id").getAsString();
             String _username = obj.get("username").getAsString();
             String playcount = obj.get("playcount").getAsString();
@@ -227,7 +228,7 @@ public class OSUHandler {
             String pp_rank = obj.get("pp_rank").getAsString();
             String level = obj.get("level").getAsString();
             String pp_raw = obj.get("pp_raw").getAsString();
-            String accuracy = obj.get("accuracy").getAsString().substring(0,4);
+            String accuracy = obj.get("accuracy").getAsString().substring(0,5);
             String count_rank_ss = obj.get("count_rank_ss").getAsString();
             String count_rank_s = obj.get("count_rank_s").getAsString();
             String count_rank_a = obj.get("count_rank_a").getAsString();
@@ -249,6 +250,7 @@ public class OSUHandler {
                     "```";
             */
 
+            //搞不懂这排版，先这么放着吧
             EmbedObject embedObject = new EmbedBuilder()
                     .withAuthorName(_username + "'s profile " + country)
                     .withAuthorIcon("https://a.ppy.sh/" + userid)
@@ -256,10 +258,10 @@ public class OSUHandler {
                     .withColor(255,255,255)
                     .appendField("PlayCount: ", playcount, true)
                     .appendField("PP: ",pp_raw, true)
-                    .appendField("Global Rank: ",pp_rank, false)
+                    .appendField("Accuracy: ",accuracy + "%",true)
+                    .appendField("Global Rank: ",pp_rank, true)
                     .appendField("Country Rank: ",pp_country_rank, true)
-                    .appendField("Accuracy: ",accuracy,true)
-                    .appendField("Ranked Score: ", ranked_score, false)
+                    .appendField("Ranked Score: ", ranked_score, true)
                     .appendField("Total Score: ",total_score,true)
                     .appendField("Level:", level, true)
                     .build();
