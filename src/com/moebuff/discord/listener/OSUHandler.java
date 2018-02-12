@@ -23,12 +23,17 @@ import java.net.URLConnection;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Handler;
 
 public class OSUHandler {
 
     private static String RANK_A_ICON = "https://cdn.discordapp.com/emojis/365509580593299466.png";
     private static String RANK_S_ICON = "https://cdn.discordapp.com/emojis/365509580731449354.png";
     private static String RANK_SS_ICON = "https://cdn.discordapp.com/emojis/365509580622659585.png";
+
+    private static Map<IChannel, Koohii.Map> lastMapRequested = new HashMap<IChannel, Koohii.Map>();
 
     public static void handle(IGuild guild, IChannel channel, IUser user, IMessage message, String[] args){
         if (args.length == 0) {
@@ -75,10 +80,13 @@ public class OSUHandler {
                 }
                 break;
             case "pp":
-                pp(channel, args);
+                calcPP(channel, params);
+                break;
+            case "with":
+                calcPPWithMods(channel, params);
                 break;
             default:
-                channel.sendMessage("unknown command");
+                channel.sendMessage("unknown command.");
                 break;
         }
     }
@@ -229,28 +237,12 @@ public class OSUHandler {
             String level = obj.get("level").getAsString();
             String pp_raw = obj.get("pp_raw").getAsString();
             String accuracy = obj.get("accuracy").getAsString().substring(0,5);
-            String count_rank_ss = obj.get("count_rank_ss").getAsString();
-            String count_rank_s = obj.get("count_rank_s").getAsString();
-            String count_rank_a = obj.get("count_rank_a").getAsString();
             String country = obj.get("country").getAsString();
             String pp_country_rank = obj.get("pp_country_rank").getAsString();
             String userpage = "https://osu.ppy.sh/u/" + userid;
-            /* 改用EmbedObject
-            String resultMsg = "```\n" +
-                    "Username: " + _username + "\n" +
-                    "Userpage: " + userpage + "\n" +
-                    "Playcount: " + playcount + "\n" +
-                    "PP: " + pp_raw + "\n" +
-                    "Accuracy: " + accuracy + "\n" +
-                    "Global Rank: " + pp_rank + "\n" +
-                    "Country Rank: " + pp_country_rank + "\n" +
-                    "Ranked Score: " + ranked_score + "\n" +
-                    "Total Score: " + total_score + "\n" +
-                    "Level: " + level + "\n" +
-                    "```";
-            */
 
             //搞不懂这排版，先这么放着吧
+            //inline = false 会在field前后都换行，差评
             EmbedObject embedObject = new EmbedBuilder()
                     .withAuthorName(_username + "'s profile " + country)
                     .withAuthorIcon("https://a.ppy.sh/" + userid)
@@ -272,23 +264,18 @@ public class OSUHandler {
     //暂时不考虑新主页的beatmap链接
     //如果是beatmapset链接(s/xxxxx)默认返回主难度
     //目前oppai的java库只支持std和taiko，而且taiko的转谱好像还不准
-    public static void pp(IChannel channel, String[] args) {
-        if (args.length == 0 || args.length > 1) {
+    public static void calcPP(IChannel channel, String[] params) {
+        if (params.length == 0 || params.length > 1) {
             channel.sendMessage("please use this command like `%pp https://osu.ppy.sh/s/648232`");
             return;
         }
         String beatmapid = "";
-        String params = "";
+        String request_params = "";
 
-        String artist = "artist";
-        String title = "";
-        String mapper = "";
-        String diffName = "";
-        String star = "";
-        //根据setid返回主难度id
-        if (args[0].matches("(https://)?osu.ppy.sh/s/\\d+")) {
-            String setid = args[0].substring(args[0].lastIndexOf("/") + 1);
-            params = "k=" + Settings.OSU_APIKEY + "&s=" + setid;
+        //根据setid返回STD主难度id
+        if (params[0].matches("(https://)?osu.ppy.sh/s/\\d+")) {
+            String setid = params[0].substring(params[0].lastIndexOf("/") + 1);
+            request_params = "k=" + Settings.OSU_APIKEY + "&s=" + setid;
             try {
                 URL url = new URL("https://osu.ppy.sh/api/get_beatmaps");
                 URLConnection conn = url.openConnection();
@@ -296,7 +283,7 @@ public class OSUHandler {
                 conn.setDoInput(true);
                 conn.setDoOutput(true);
                 BufferedWriter bw = new BufferedWriter((new OutputStreamWriter(conn.getOutputStream())));
-                bw.write(params);
+                bw.write(request_params);
                 bw.flush();
                 bw.close();
                 BufferedReader bf = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -310,21 +297,28 @@ public class OSUHandler {
                     channel.sendMessage("beatmap does not exist.");
                     return;
                 }
-                JsonObject jsonObject = new JsonParser().parse(result).getAsJsonArray().get(0).getAsJsonObject();
-                beatmapid = jsonObject.get("beatmap_id").getAsString();
-                artist = jsonObject.get("artist").getAsString();
-                title = jsonObject.get("title").getAsString();
-                mapper = jsonObject.get("creator").getAsString();
-                diffName = jsonObject.get("version").getAsString();
-                star = jsonObject.get("difficultyrating").getAsString();
+                JsonArray beatmaps = new JsonParser().parse(result).getAsJsonArray();
+                //倒序查找STD主难度，因为其他模式的排在STD后面
+                int size = beatmaps.size();
+                for(; size > 0; size--){
+                    JsonObject beatmap = beatmaps.get(size-1).getAsJsonObject();
+                    if(beatmap.get("mode").getAsInt() == 0){
+                        beatmapid = beatmap.get("beatmap_id").getAsString();
+                        break;
+                    }
+                }
+                if("".equals(beatmapid)){
+                    channel.sendMessage("only support STD now.");
+                    return;
+                }
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else if (args[0].matches("(https://)?osu.ppy.sh/b/\\d+")) {
-            beatmapid = args[0].substring(args[0].lastIndexOf("/") + 1);
-            params = "k=" + Settings.OSU_APIKEY + "&b=" + beatmapid;
+        } else if (params[0].matches("(https://)?osu.ppy.sh/b/\\d+")) {
+            beatmapid = params[0].substring(params[0].lastIndexOf("/") + 1);
+            request_params = "k=" + Settings.OSU_APIKEY + "&b=" + beatmapid;
             try {
                 URL url = new URL("https://osu.ppy.sh/api/get_beatmaps");
                 URLConnection conn = url.openConnection();
@@ -332,7 +326,7 @@ public class OSUHandler {
                 conn.setDoInput(true);
                 conn.setDoOutput(true);
                 BufferedWriter bw = new BufferedWriter((new OutputStreamWriter(conn.getOutputStream())));
-                bw.write(params);
+                bw.write(request_params);
                 bw.flush();
                 bw.close();
                 BufferedReader bf = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -346,13 +340,6 @@ public class OSUHandler {
                     channel.sendMessage("beatmap does not exist.");
                     return;
                 }
-                JsonObject jsonObject = new JsonParser().parse(result)
-                        .getAsJsonArray().get(0).getAsJsonObject();
-                artist = jsonObject.get("artist").getAsString();
-                title = jsonObject.get("title").getAsString();
-                mapper = jsonObject.get("creator").getAsString();
-                diffName = jsonObject.get("version").getAsString();
-                star = jsonObject.get("difficultyrating").getAsString();
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -376,6 +363,7 @@ public class OSUHandler {
             //oppai by Koohii
             BufferedReader stdin = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             Koohii.Map beatmap = new Koohii.Parser().map(stdin);
+            lastMapRequested.put(channel,beatmap);
             Koohii.DiffCalc stars = new Koohii.DiffCalc().calc(beatmap);
             Koohii.PPv2 pp = new Koohii.PPv2(
                     stars.aim, stars.speed, beatmap);
@@ -383,11 +371,29 @@ public class OSUHandler {
                             "Beatmap by %s\n" +
                             "Star Rating: %s\n" +
                             "pp for SS: %s",
-                    artist,title,diffName,mapper,star,pp.total));
+                    beatmap.artist,beatmap.title,beatmap.version,beatmap.creator,stars.total,pp.total));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void calcPPWithMods(IChannel channel, String[] params){
+        int mods = Koohii.mods_from_str(params[0]);
+        Koohii.Map lastMap = lastMapRequested.get(channel);
+        if(lastMap == null){
+            channel.sendMessage("I don't know which map you are referring.");
+            return;
+        }
+        Koohii.DiffCalc stars = new Koohii.DiffCalc().calc(lastMap, mods);
+        Koohii.PPv2 pp = new Koohii.PPv2(
+                stars.aim, stars.speed, lastMap, params[0]);
+        channel.sendMessage(String.format("%s - %s[%s]\n" +
+                        "Beatmap by %s\n" +
+                        "Star Rating: %s\n" +
+                        "pp for SS: %s\n" +
+                        "**with %s**",
+                lastMap.artist, lastMap.title, lastMap.version, lastMap.creator, stars,pp.total, params[0].toUpperCase()));
     }
 }

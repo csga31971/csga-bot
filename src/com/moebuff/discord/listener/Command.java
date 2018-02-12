@@ -46,7 +46,7 @@ public class Command {
         guild = message.getGuild();
         List<IUser> mentionedUsers = message.getMentions();
         List<IRole> mentionedRoles = message.getRoleMentions();
-        String[] split = message.getContent().split(" ");
+        String[] split = message.getContent().replaceAll("\\s{2,}"," ").split(" ");
 
         String cmd = split[0];
         if (!cmd.startsWith(PREFIX)) return;
@@ -129,6 +129,9 @@ public class Command {
 
              break;
              */
+            case "gust":
+                message.getClient().changePlayingText("with Gust's waifu");
+                break;
             default:
                 message.getClient().changePlayingText(cmd);
                 break;

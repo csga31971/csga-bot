@@ -705,10 +705,10 @@ exception since you can check lastline/lastpos when you catch */
 
     /** @return mod bitmask from the string representation */
     public static
-    int mods_from_str(String str)
+    int mods_from_str(String str1)
     {
         int mask = 0;
-
+        String str = str1.toUpperCase();
         if (str.indexOf("NF") >= 0) {
             mask |= MODS_NF;
         }
@@ -1279,6 +1279,8 @@ exception since you can check lastline/lastpos when you catch */
             return calc(beatmap, MODS_NOMOD,
                     DEFAULT_SINGLETAP_THRESHOLD);
         }
+
+
     }
 
 /* ------------------------------------------------------------- */
@@ -1491,12 +1493,14 @@ exception since you can check lastline/lastpos when you catch */
                 nobjects = beatmap.objects.size();
             }
 
+            /*
+            交给bot处理
             if (mode != MODE_STD)
             {
                 throw new UnsupportedOperationException(
                         "this gamemode is not yet supported"
                 );
-            }
+            }*/
 
             if (max_combo <= 0)
             {
@@ -1660,6 +1664,21 @@ exception since you can check lastline/lastpos when you catch */
                     b.objects.size(), b.ar, b.od, b.mode, MODS_NOMOD, -1,
                     -1, 0, 0, 0, 1, b);
         }
+
+        /**
+         * 添加支持mod的pp查询
+         * @param aim_stars
+         * @param speed_stars
+         * @param b
+         * @param mods
+         */
+        public PPv2(double aim_stars, double speed_stars, Map b, String mods)
+        {
+            this(aim_stars, speed_stars, -1, b.nsliders, b.ncircles,
+                    b.objects.size(), b.ar, b.od, b.mode, mods_from_str(mods), -1,
+                    -1, 0, 0, 0, 1, b);
+        }
+
     }
 
 } /* public final class Koohii */
