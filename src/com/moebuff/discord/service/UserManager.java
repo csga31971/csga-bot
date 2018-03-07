@@ -15,6 +15,10 @@ public class UserManager {
         return userdao.getUser(userid);
     }
 
+    public static User getUser(IUser iUser){
+        return getUser(iUser.getStringID());
+    }
+
     public static void addUser(IUser iUser){
         session = MybatisUtil.getSession();
         UserDAO userdao = session.getMapper(UserDAO.class);

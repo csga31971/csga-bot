@@ -7,6 +7,9 @@ import com.moebuff.discord.dao.GiftDAO;
 import com.moebuff.discord.utils.MybatisUtil;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.ibatis.session.SqlSession;
+import org.pircbotx.Configuration;
+import org.pircbotx.PircBotX;
+import org.pircbotx.exception.IrcException;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
@@ -16,6 +19,7 @@ import sx.blah.discord.util.EmbedBuilder;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -37,7 +41,7 @@ public class Command {
 
     @EventSubscriber
     public static void onMessageReceived(MessageReceivedEvent event)
-            throws RateLimitException, DiscordException, MissingPermissionsException {
+            throws RateLimitException, DiscordException, MissingPermissionsException, IOException, IrcException {
         message = event.getMessage();
         user = message.getAuthor();
         if (user.isBot()) return;
@@ -114,7 +118,7 @@ public class Command {
                 Silence.reset(guild, channel);
                 break;
             case "gift":
-                Gift();
+                GiftHandler.handle(guild,channel,message.getAuthor(),message,args);
                 break;
             /**
              *
@@ -131,6 +135,9 @@ public class Command {
              */
             case "gust":
                 message.getClient().changePlayingText("with Gust's waifu");
+                break;
+            case "irc":
+                IRC.handle(guild,channel,args);
                 break;
             default:
                 message.getClient().changePlayingText(cmd);
@@ -181,7 +188,5 @@ public class Command {
         channel.sendMessage(repeatContent);
     }
 
-    public static void Gift(){
-        GiftHandler.handle(guild,channel,message.getAuthor(),message,args);
-    }
+
 }

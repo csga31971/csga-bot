@@ -24,7 +24,7 @@ public class GiftManager {
     }
 
     public static List<Gift> getGiftList(){
-        SqlSession session = MybatisUtil.getSession();
+        session = MybatisUtil.getSession();
         GiftDAO dao = session.getMapper(GiftDAO.class);
         return dao.getGiftList();
     }
