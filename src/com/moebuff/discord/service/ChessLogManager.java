@@ -13,6 +13,8 @@ public class ChessLogManager {
         session = MybatisUtil.getSession();
         ChessLogDAO dao = session.getMapper(ChessLogDAO.class);
         dao.insert(color,x,y,room.getId());
+        session.commit();
+        session.close();
     }
 
 }

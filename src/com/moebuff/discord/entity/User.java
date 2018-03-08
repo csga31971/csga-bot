@@ -51,6 +51,12 @@ public class User {
     public String toString(){
         return username + ": money = " + money + "; charm points = " + charmPoint + " ; rich points = " + richPoint + ".";
     }
+
+    @Override
+    public boolean equals(Object that){
+        return this.userid == ((User)that).getUserid();
+    }
+
     public User(){
         money = 100;
         richPoint = 0;

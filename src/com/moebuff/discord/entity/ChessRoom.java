@@ -37,4 +37,30 @@ public class ChessRoom {
     public void setChessboard(String chessboard) {
         this.chessboard = chessboard;
     }
+
+    @Override
+    public boolean equals(Object that){
+        return this.id == ((ChessRoom)that).id;
+    }
+
+    @Override
+    public String toString(){
+
+        if(new Integer(id) == null){
+            return "null";
+        }
+        String result = id + ": " + "[";
+        if(player1 == null){
+            result += "player1:null ], [";
+        }else {
+            result += player1.getUsername() + ": " + player1.getUserid() + "], [";
+        }
+
+        if(player2 == null){
+            result += "player2:null ]";
+        }else {
+            result += player2.getUsername() + ": " + player2.getUserid() + "]";
+        }
+        return result;
+    }
 }

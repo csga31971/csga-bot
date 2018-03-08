@@ -139,6 +139,9 @@ public class Command {
             case "irc":
                 IRC.handle(guild,channel,args);
                 break;
+            case "five":
+                FiveChess.handle(guild,channel,user,message,args);
+                break;
             default:
                 message.getClient().changePlayingText(cmd);
                 break;

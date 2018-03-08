@@ -34,9 +34,9 @@ public class BotLauncher implements IListener<ReadyEvent> {
 
     @Override
     public void handle(ReadyEvent event) {
-        List<IUser> users = client.getUsers();
+        /*List<IUser> users = client.getUsers();
         int index = RandomUtils.nextInt(0, users.size());
-        String name = users.get(index).getName();
-        client.changePlayingText(name);
+        String name = users.get(index).getName();*/
+        client.changePlayingText("Exception");
     }
 }
