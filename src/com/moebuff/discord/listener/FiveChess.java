@@ -1,8 +1,11 @@
 package com.moebuff.discord.listener;
 
+import com.google.gson.Gson;
 import com.moebuff.discord.entity.ChessRoom;
+import com.moebuff.discord.entity.User;
 import com.moebuff.discord.service.ChessLogManager;
 import com.moebuff.discord.service.ChessRoomManager;
+import com.moebuff.discord.service.UserManager;
 import com.moebuff.discord.utils.Log;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
@@ -19,24 +22,25 @@ import java.util.Map;
 
 public class FiveChess {
 
-    private static BufferedImage image;
+    /*private static BufferedImage image;
     private static File file;
-    private static FileOutputStream fileOutputStream;
+    private static FileOutputStream fileOutputStream;*/
 
     private static int grid_count = 20;
     private static int grid_long = 20;
-    private static int grid_size = grid_long*grid_long;
     private static int pieces_size = 14;
 
+    //房间id和二维数组（棋盘）对应
     private static Map<Integer, int[][]> roomMap = new HashMap<>();
+
     /**
      *  0 = 没下
      *  1 = 红
-     *  -1 = 黑
+     *  2 = 黑
      */
     private static int[][] chessboard = new int[grid_count+1][grid_count+1];
 
-    static {
+    /*static {
         try {
             image = ImageIO.read(new File("res/chessboards/empty.png"));
             //file = new File("res/chessboards/result.png");
@@ -51,7 +55,7 @@ public class FiveChess {
             if(i == chessboard.length-1)
                 break;
         }
-    }
+    }*/
 
     public static void handle(IGuild guild, IChannel channel, IUser user, IMessage message, String[] args) throws IOException {
         if (args.length == 0) {
@@ -71,14 +75,21 @@ public class FiveChess {
             }
         }
         switch (args[0]){
+            case "s":
             case "start":
                 start(channel, user);
                 break;
+            case "j":
             case "join":
                 join(channel, user, params);
                 break;
+            case "p":
             case "place":
                 place(channel, user, params);
+                break;
+            case "q":
+            case"quit":
+                quit(channel, user, params);
                 break;
             default:
                 channel.sendMessage("unknown command.");
@@ -86,19 +97,33 @@ public class FiveChess {
         }
     }
 
-    private static void start(IChannel channel, IUser player1) throws IOException {
-        //是否已经在房间里
-        ChessRoom room = ChessRoomManager.createRoom(player1);
-        Log.getLogger().info(room.toString());
+    private static void start(IChannel channel, IUser user) throws IOException {
+        //默认创建房间的是player1（房主？）
+        ChessRoom room = ChessRoomManager.createRoom(user);
+        if(room != null)
+            Log.getLogger().info(room.toString());
+
+        //返回null居然代表已经在房间里，太弱智了
         if(room == null){
-            //返回null居然代表已经在房间里，太弱智了
+            ChessRoom joinedRoom = ChessRoomManager.getRoomByUser(user);
             channel.sendMessage("you are already in a room");
-            //读取文件
-            File boardTXT = new File("res/chessboards/" + player1.getStringID() + ".txt");
-            int[][] board = new int[grid_count+1][grid_count+1];
+            User player1 = UserManager.getUser(user);
+
+            //user是player2，靠player1的ID读文件
+            if(joinedRoom.getPlayer2().equals(player1)){
+                player1 = ChessRoomManager.getRoomByUser(user).getPlayer1();
+            }
+
+            //读取上次的txt文件
+            File boardTXT = new File("res/chessboards/" + user.getStringID() + ".txt");
             FileReader reader = new FileReader(boardTXT);
             char[] c = new char[1024];
+            int[][] board = new int[grid_count+1][grid_count+1];
+            reader.read(c);
+
             String str = new String(c);
+            Log.getLogger().debug(str);
+
             String[] rows = str.split("\n");
             for(int i=0;i<rows.length-1;i++){
                 String[] columns = rows[i].split(" ");
@@ -106,11 +131,14 @@ public class FiveChess {
                     board[i][j] = Integer.valueOf(columns[j]);
                 }
             }
-            roomMap.put(room.getId(),board);
+
+            roomMap.put(joinedRoom.getId(),board);
+            Log.getLogger().debug(new Gson().toJson(roomMap));
             return;
         }
 
-        //复制一份空棋盘
+        //没有在房间里
+        //复制一份空棋盘图片
         File boardImage = new File("res/chessboards/" + room.getChessboard() + ".png");
         if(!boardImage.exists()){
             FileInputStream inputStream = new FileInputStream(new File("res/chessboards/empty.png"));
@@ -121,18 +149,19 @@ public class FiveChess {
                 outputStream.write(b, 0, n);
             }
             inputStream.close();
+            outputStream.flush();
             outputStream.close();
         }
 
-        //创建文件，初始化00000000000000000000000
-        File boardTXT = new File("res/chessboards/" + player1.getStringID() + ".txt");
+        //创建txt文件，初始化00000000000000000000000
+        File boardTXT = new File("res/chessboards/" + user.getStringID() + ".txt");
         if(!boardTXT.exists()){
             //其实不用判断
             int[][] board = new int[grid_count+1][grid_count+1];
             for(int i=0;i<board.length;i++){
                 Arrays.fill(board[i], 0);
             }
-            FileOutputStream outputStream = new FileOutputStream(boardImage);
+            FileOutputStream outputStream = new FileOutputStream(boardTXT);
             for(int i=0;i<board.length;i++){
                 for(int j=0;j<board[i].length;j++){
                     outputStream.write(board[i][j]+48);//ASCII
@@ -143,7 +172,7 @@ public class FiveChess {
             outputStream.flush();
             outputStream.close();
             roomMap.put(room.getId(), board);
-            channel.sendMessage(player1.getName() + " created room " + room.getId());
+            channel.sendMessage(user.getName() + " created room " + room.getId());
         }
     }
 
@@ -160,7 +189,13 @@ public class FiveChess {
                     channel.sendMessage("you are already in this room");
                     break;
                 case 1:
-                    channel.sendMessage(player2.getName() + " joined room" + params[0]);
+                    channel.sendMessage(player2.getName() + " joined room " + params[0]);
+                    break;
+                case -2:
+                    channel.sendMessage("no room exists with id " + roomid);
+                    break;
+                case -3:
+                    channel.sendMessage("something is wrong");
                     break;
             }
         } catch (Exception e){
@@ -170,12 +205,19 @@ public class FiveChess {
 
     private static void place(IChannel channel, IUser player, String[] params){
         ChessRoom room = ChessRoomManager.getRoomByUser(player);
-        if(room == null){
+        if(room.getId() == -1){
             channel.sendMessage("you are not in a room");
             return;
         }
         if(room.getPlayer1() == null || room.getPlayer2() == null){
             channel.sendMessage("game has not started yet");
+            return;
+        }
+        int color = ChessRoomManager.getColor(player);
+        int now = room.getNow();
+        Log.getLogger().debug("color " + color + " now " + now);
+        if(color != now){
+            channel.sendMessage("it's not your turn");
             return;
         }
         try {
@@ -190,15 +232,29 @@ public class FiveChess {
                 channel.sendMessage("you can't place here");
                 return;
             }
-            int color = ChessRoomManager.getColor(player);
             board[x][y] = color;
+            room.setNow(3-room.getNow());
+            ChessRoomManager.toggleTurn(room);
 
-            ChessLogManager.addLog(color,x,y,room);
+            File boardTXT = new File("res/chessboards/" + room.getChessboard() + ".txt");
+            FileOutputStream outputStream = new FileOutputStream(boardTXT);
+            for(int i=0;i<board.length;i++){
+                for(int j=0;j<board[i].length;j++){
+                    //这里xy要反过来，蛋疼
+                    outputStream.write(board[j][i]+48);//ASCII
+                    outputStream.write(32);
+                }
+                outputStream.write(10);
+            }
+            outputStream.flush();
+            outputStream.close();
             roomMap.put(room.getId(), board);
 
             File boardImage = new File("res/chessboards/" + room.getChessboard() + ".png");
             place(boardImage,x,y,color);
             channel.sendFile(boardImage);
+
+            ChessLogManager.addLog(color,x,y,room);
 
             int win = win(board);
             if(win == 1){
@@ -210,10 +266,38 @@ public class FiveChess {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (NumberFormatException e) {
+            channel.sendMessage("invalid params");
+            e.printStackTrace();
+        } catch (ArrayIndexOutOfBoundsException e) {
+            channel.sendMessage("index out of bounds");
+            e.printStackTrace();
         }
     }
 
-    /*private static void init() throws IOException {
+    public static void quit(IChannel channel, IUser user, String[] args){
+        int result = ChessRoomManager.quitRoom(user);
+        switch (result){
+            case 0:
+                channel.sendMessage("you are not in a room");
+                break;
+            case 1:
+                File boardImage = new File("res/chessboards/" + user.getStringID() + ".png");
+                boardImage.delete();
+                File boardTXT = new File("res/chessboards/" + user.getStringID() + ".txt");
+                boardTXT.delete();
+                channel.sendMessage("room boom");
+                break;
+            case -1:
+                channel.sendMessage("886");
+                break;
+             default:
+                channel.sendMessage("something is wrong");
+        }
+    }
+
+    /*测试
+    private static void init() throws IOException {
         Graphics2D graphics2D = image.createGraphics();
         graphics2D.setColor(Color.BLACK);
         int height = image.getHeight();
@@ -240,6 +324,8 @@ public class FiveChess {
         ImageIO.write(image, "png", file);
     }
 
+    //判断胜利
+    //从一个点向两个方向拓展，若拓展的距离和为4则胜利
     private static int win(int [][] chessboard){
         int current = 0;
         int left = 0;
@@ -317,7 +403,8 @@ public class FiveChess {
         }
         return current;
     }
-    /*
+
+    /*测试
     public static void main(String[] args){
         try {
             //init();

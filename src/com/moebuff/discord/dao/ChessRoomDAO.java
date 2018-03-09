@@ -14,6 +14,7 @@ public interface ChessRoomDAO {
     void setPlayer2ToNull(ChessRoom room);
     void addPlayer2ToRoom(@Param("player2") User player2, @Param("roomid") int roomid);
     void updateRoom(ChessRoom room);
-    ChessRoom findRoomById(@Param("id") int id);
+    Map findRoomById(@Param("id") int id);
     Map findRoomByUser(User player);
+    void updateNow(ChessRoom room);
 }

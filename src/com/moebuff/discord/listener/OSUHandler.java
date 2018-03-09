@@ -80,10 +80,10 @@ public class OSUHandler {
                 }
                 break;
             case "pp":
-                calcPP(channel, params);
+                calcPP(channel, message, params);
                 break;
             case "with":
-                calcPPWithMods(channel, params);
+                calcPPWithMods(channel, message, params);
                 break;
             default:
                 channel.sendMessage("unknown command.");
@@ -264,7 +264,7 @@ public class OSUHandler {
     //暂时不考虑新主页的beatmap链接
     //如果是beatmapset链接(s/xxxxx)默认返回主难度
     //目前oppai的java库只支持std和taiko，而且taiko的转谱好像还不准
-    public static void calcPP(IChannel channel, String[] params) {
+    public static void calcPP(IChannel channel, IMessage message, String[] params) {
         if (params.length == 0 || params.length > 1) {
             channel.sendMessage("please use this command like `%pp https://osu.ppy.sh/s/648232`");
             return;
@@ -372,6 +372,8 @@ public class OSUHandler {
                             "Star Rating: %s\n" +
                             "pp for SS: %s",
                     beatmap.artist,beatmap.title,beatmap.version,beatmap.creator,stars.total,pp.total));
+
+            message.getClient().changePlayingText(beatmap.title);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -379,7 +381,7 @@ public class OSUHandler {
         }
     }
 
-    private static void calcPPWithMods(IChannel channel, String[] params){
+    private static void calcPPWithMods(IChannel channel, IMessage message, String[] params){
         int mods = Koohii.mods_from_str(params[0]);
         Koohii.Map lastMap = lastMapRequested.get(channel);
         if(lastMap == null){
@@ -395,5 +397,6 @@ public class OSUHandler {
                         "pp for SS: %s\n" +
                         "**with %s**",
                 lastMap.artist, lastMap.title, lastMap.version, lastMap.creator, stars,pp.total, params[0].toUpperCase()));
+        message.getClient().changePlayingText(lastMap.title + " " + params[0]);
     }
 }

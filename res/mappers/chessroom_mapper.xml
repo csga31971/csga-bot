@@ -6,9 +6,10 @@
         <result property="player1" column="player1"></result>
         <result property="player2" column="player2"></result>
         <result property="chessboard" column="chessboard"></result>
+        <result property="now" column="now"></result>
     </resultMap>
     <insert id="insertRoom" parameterType="com.moebuff.discord.entity.ChessRoom">
-        insert into chessroom values(null,#{player1.userid},#{player2.userid},#{chessboard})
+        insert into chessroom values(null,#{player1.userid},#{player2.userid},#{chessboard},#{now})
     </insert>
     <update id="setPlayer1ToNull" parameterType="com.moebuff.discord.entity.ChessRoom">
         update chessroom set player1 = null where id = #{id}
@@ -19,10 +20,16 @@
     <update id="addPlayer2ToRoom">
         update chessroom set player2 = #{player2.userid} where id = #{roomid}
     </update>
-    <select id="findRoomById" parameterType="java.lang.Integer" resultType="com.moebuff.discord.entity.ChessRoom">
+    <select id="findRoomById" parameterType="java.lang.Integer" resultMap="roomMap">
         select * from chessroom where id = #{id}
     </select>
     <select id="findRoomByUser" parameterType="com.moebuff.discord.entity.User" resultMap="roomMap">
         select * from chessroom where player1 = #{userid} or player2 = #{userid}
     </select>
+    <update id="updateNow" parameterType="com.moebuff.discord.entity.ChessRoom">
+        update chessroom set now = #{now} where id = #{id}
+    </update>
+    <delete id="deleteRoom" parameterType="com.moebuff.discord.entity.ChessRoom">
+        delete from chessroom where id = #{id}
+    </delete>
 </mapper>

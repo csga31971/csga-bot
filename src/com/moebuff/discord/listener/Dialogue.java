@@ -62,21 +62,7 @@ public class Dialogue {
         }
     }
 
-    /*
-    事实上每次登陆都会触发，有点扰民，先去掉了
-    @EventSubscriber
-    public static void onJoinGuild(GuildCreateEvent event)
-            throws MissingPermissionsException, RateLimitException, DiscordException{
-        //also on bot login
-        IGuild guild = event.getGuild();
-        List<IChannel> channelList = guild.getChannelsByName("general");
-        if(channelList.size()>0){
-            IChannel generalChannel = channelList.get(0);
-            generalChannel.sendMessage("O-ooooooo-aaaa-e-a-e-i-e-a-Joooooooo");
-        }
 
-    }
-    */
 
     @EventSubscriber
     public static void onWhatReceive(MessageReceivedEvent event){

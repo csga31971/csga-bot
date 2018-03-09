@@ -5,6 +5,7 @@ public class ChessRoom {
     private User player1;
     private User player2;
     private String chessboard;
+    private int now;
 
     public int getId() {
         return id;
@@ -38,6 +39,14 @@ public class ChessRoom {
         this.chessboard = chessboard;
     }
 
+    public int getNow() {
+        return now;
+    }
+
+    public void setNow(int now) {
+        this.now = now;
+    }
+
     @Override
     public boolean equals(Object that){
         return this.id == ((ChessRoom)that).id;
@@ -61,6 +70,8 @@ public class ChessRoom {
         }else {
             result += player2.getUsername() + ": " + player2.getUserid() + "]";
         }
+
+        result += "now: " + now;
         return result;
     }
 }
