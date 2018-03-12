@@ -37,10 +37,10 @@ public class BotLauncher implements IListener<ReadyEvent> {
     public void handle(ReadyEvent event) {
         client.changePlayingText("Exception");
         //弱智
-        IChannel spamChannel = event.getClient().getChannelByID(329504105137438722L);
+        /*IChannel spamChannel = event.getClient().getChannelByID(329504105137438722L);
         if(spamChannel != null){
             spamChannel.sendMessage("Let The Bass Kick!");
             spamChannel.sendMessage("O-oooooooooo AAAAE-A-A-I-A-U- JO-oooooooooooo AAE-O-A-A-U-U-A- E-eee-ee-eee AAAAE-A-E-I-E-A- JO-ooo-oo-oo-oo EEEEO-A-AAA-AAAA");
-        }
+        }*/
     }
 }

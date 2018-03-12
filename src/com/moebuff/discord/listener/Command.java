@@ -142,6 +142,9 @@ public class Command {
             case "five":
                 FiveChess.handle(guild,channel,user,message,args);
                 break;
+            case "panda":
+                PandaHandler.handle(guild,channel,user,message,args);
+                break;
             default:
                 message.getClient().changePlayingText(cmd);
                 break;

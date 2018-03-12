@@ -196,7 +196,6 @@ public class OSUHandler {
 
     private static void OSUProfile(IChannel channel, IUser user, IMessage message) throws RateLimitException, DiscordException, MissingPermissionsException, IOException {
         String username = OSUIDManager.get(user.getStringID());
-        //Systemessage.out.println("username:" + username);
         if ("".equals(username) || username == null) {
             message.reply("set your osu!id first please!(use " + Settings.PREFIX + "setid [id] command");
         } else {
@@ -218,7 +217,7 @@ public class OSUHandler {
             }
             bf.close();
             if (result.length() < 4) {
-                channel.sendMessage("no score found in last 24h.");
+                channel.sendMessage("no data, something is wrong?");
                 return;
             }
 
