@@ -37,6 +37,7 @@ public class PandaHandler {
                 param_with_spacebar += " ";
             }
         }
+        //怎么判断比较好
         try{
             int index = Integer.valueOf(args[0]);
         } catch (Exception e){
@@ -51,12 +52,14 @@ public class PandaHandler {
             channel.sendMessage("only support 1,2,3 now");
             return;
         }
+
+        //空字符串
         if(text.matches("\\s*")){
-            File file = new File("res/panda/panda" + index + ".jpg");
-            File file_result = new File("res/panda/panda_result.jpg");
+            File file = new File("panda/panda" + index + ".jpg");
+            File file_result = new File("panda/panda_result.jpg");
             FileUtil.copyFile(file,file_result);
 
-            ImageIcon imageIcon = new ImageIcon("res/panda/" + file.getName());
+            ImageIcon imageIcon = new ImageIcon("panda/" + file.getName());
             Image image = imageIcon.getImage();
             int width = image.getWidth(null);
             int height = image.getHeight(null);
@@ -74,15 +77,14 @@ public class PandaHandler {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }else{
             try {
                 //复制一份模板
-                File file = new File("res/panda/panda" + index + ".jpg");
-                File file_result = new File("res/panda/panda_result.jpg");
+                File file = new File("panda/panda" + index + ".jpg");
+                File file_result = new File("panda/panda_result.jpg");
                 FileUtil.copyFile(file,file_result);
 
-                ImageIcon imageIcon = new ImageIcon("res/panda/" + file.getName());
+                ImageIcon imageIcon = new ImageIcon("panda/" + file.getName());
                 Image image = imageIcon.getImage();
                 int width = image.getWidth(null);
                 int height = image.getHeight(null);

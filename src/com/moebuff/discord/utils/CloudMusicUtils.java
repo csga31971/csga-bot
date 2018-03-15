@@ -108,6 +108,7 @@ public class CloudMusicUtils {
             while((i=reader.read())!=-1){
                 result+=reader.readLine();
             }
+            Log.getLogger().info(result);
             return new JsonParser().parse(result).getAsJsonObject().
                     get("data").getAsJsonArray().
                     get(0).getAsJsonObject().
@@ -118,5 +119,4 @@ public class CloudMusicUtils {
         }
         return null;
     }
-
 }

@@ -44,13 +44,14 @@ public class RandomListeners {
 
     @EventSubscriber
     public static void onGuildEmojisUpdate(GuildEmojisUpdateEvent event){
-        IChannel channel = event.getGuild().getChannelsByName("general").get(0);
+        //API有bug，先不管
+        /*IChannel channel = event.getGuild().getChannelsByName("general").get(0);
         List<IEmoji> emojis = event.getNewEmojis();
         if(channel!=null){
             for(IEmoji emoji : emojis){
                 channel.sendMessage(emoji.getName());
             }
-        }
+        }*/
     }
 
     @EventSubscriber

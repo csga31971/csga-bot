@@ -382,6 +382,10 @@ public class OSUHandler {
 
     private static void calcPPWithMods(IChannel channel, IMessage message, String[] params){
         int mods = Koohii.mods_from_str(params[0]);
+        if(mods == 0){
+            channel.sendMessage("unknown mods");
+            return;
+        }
         Koohii.Map lastMap = lastMapRequested.get(channel);
         if(lastMap == null){
             channel.sendMessage("I don't know which map you are referring.");
