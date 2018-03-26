@@ -1,24 +1,17 @@
 package com.moebuff.discord.listener;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonParser;
 import com.moebuff.discord.AccessControl;
 import com.moebuff.discord.PermissionException;
 import com.moebuff.discord.Settings;
-import com.moebuff.discord.dao.GiftDAO;
+import com.moebuff.discord.maps.Maps;
+import com.moebuff.discord.service.UserManager;
 import com.moebuff.discord.utils.Log;
-import com.moebuff.discord.utils.MybatisUtil;
 import org.apache.commons.lang3.RandomUtils;
-import org.apache.ibatis.session.SqlSession;
-import org.pircbotx.Configuration;
-import org.pircbotx.PircBotX;
 import org.pircbotx.exception.IrcException;
 import sx.blah.discord.api.events.EventSubscriber;
-import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.EmbedBuilder;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
@@ -26,13 +19,8 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 命令行
@@ -59,7 +47,7 @@ public class Command {
         guild = message.getGuild();
         List<IUser> mentionedUsers = message.getMentions();
         List<IRole> mentionedRoles = message.getRoleMentions();
-        String[] split = message.getContent().replaceAll("\\s{2,}"," ").split(" ");
+        String[] split = message.getContent().toLowerCase().replaceAll("\\s{2,}"," ").split(" ");
         String cmd = split[0];
         if (!cmd.startsWith(PREFIX)) return;
         args = split.length > 1 ?
@@ -165,8 +153,16 @@ public class Command {
                     channel.sendMessage(content.substring(4));
                 }
                 break;
-            case "qq":
-                qq();
+            case "setqq":
+                setQQ();
+                break;
+            case "init":
+                try{
+                    UserManager.initUser(guild);
+                } catch (Exception e){
+                    channel.sendMessage("something is wrong: " + e.getMessage());
+                }
+                channel.sendMessage("successfully initialized users");
                 break;
             default:
                 message.getClient().changePlayingText(cmd.substring(1));
@@ -179,12 +175,19 @@ public class Command {
     private static void roll()
             throws RateLimitException, DiscordException, MissingPermissionsException {
         int max = 100;
-        if (args.length > 0) {
-            max = Integer.parseInt(args[0]);
+        try{
+            if (args.length > 0) {
+                max = Integer.parseInt(args[0]);
+                if(max <= 0 ) {
+                    max = 100;
+                }
+            }
+        } catch (NumberFormatException e){
+            Log.getLogger().info(e.getMessage());
+        } finally {
+            int num = RandomUtils.nextInt(0, max);
+            message.reply(String.format("rolls %s point(s).", num));
         }
-
-        int num = RandomUtils.nextInt(0, max);
-        message.reply(String.format("rolls %s point(s).", num));
     }
 
     /**
@@ -203,14 +206,13 @@ public class Command {
         IMessage repeated = channel.getMessageHistory().get(1);
         String repeatContent = repeated.getContent();
         if (Settings.BOT_ID_STRING.equals(repeated.getAuthor().getStringID())) {
-            channel.sendMessage("I won't repeat my words ! I'm not a repeater like you! >A<");
-            if ("I won't repeat my words ! I'm not a repeater like you! >A<".equals(repeatContent)) {
+            channel.sendMessage("I won't repeat my words! I'm not a repeater like you! >A<");
+            if ("I won't repeat my words! I'm not a repeater like you! >A<".equals(repeatContent) && repeated.getAuthor()==repeated.getClient().getOurUser()) {
                 channel.sendMessage("Wait, I am not repeating myself!");
             }
             if (repeatContent.matches("Wait, I am not repeating myself[!]+")) {
-                channel.sendMessage("Wait, I am not repeating myself !" + "!!!");
+                channel.sendMessage("Wait, I am not repeating myself!" + "!!!");
             }
-
             return;
         }
         //message.edit(repeatContent);  bots can't edit users' message currently ._.
@@ -251,43 +253,12 @@ public class Command {
         }
     }
 
-    //酷Q
-    private static void qq() {
-        message.getClient().changePlayingText("tencent");
-        //仅供测试
+    private static void setQQ() {
         if(!guild.getStringID().equals("267506592977649675")){
-            channel.sendMessage("just for private use");
+            channel.sendMessage("sorry, this function is for private use");
             return;
         }
-        if(args.length<1) {
-            channel.sendMessage("please play with tencent like `" + Settings.PREFIX + "qq [message]");
-            return;
-        }
-        try {
-            URL url = new URL("http://127.0.0.1:5700/send_group_msg");
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Accept", "application/json");
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setDoOutput(true);
-            conn.setDoInput(true);
-            Map params = new HashMap();
-            params.put("group_id",135294979);//osu河北群
-            params.put("message", "from discord:[" + user.getName() + "]: " + message.getContent().substring(4));
-            params.put("auto_escape", false);
-            String s = new Gson().toJson(params);
-            conn.getOutputStream().write(s.getBytes("UTF-8"));
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String line = "";
-            line = reader.readLine();
-            Log.getLogger().info(line);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Maps.QQChannelForGuild.put(guild, channel);
+        channel.sendMessage("set qq channel: " + channel.getName() + ", all messages in this channel will be sent to qq group automatically.");
     }
 }

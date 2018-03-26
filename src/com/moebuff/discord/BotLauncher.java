@@ -12,6 +12,8 @@ import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.DiscordException;
 
+import java.io.IOException;
+import java.net.Socket;
 import java.util.List;
 
 public class BotLauncher implements IListener<ReadyEvent> {

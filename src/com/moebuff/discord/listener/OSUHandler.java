@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.moebuff.discord.Settings;
+import com.moebuff.discord.maps.Maps;
 import com.moebuff.discord.oppai.Koohii;
 import com.moebuff.discord.utils.Log;
 import com.moebuff.discord.service.OSUIDManager;
@@ -23,17 +24,12 @@ import java.net.URLConnection;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Handler;
 
 public class OSUHandler {
 
     private static String RANK_A_ICON = "https://cdn.discordapp.com/emojis/365509580593299466.png";
     private static String RANK_S_ICON = "https://cdn.discordapp.com/emojis/365509580731449354.png";
     private static String RANK_SS_ICON = "https://cdn.discordapp.com/emojis/365509580622659585.png";
-
-    private static Map<IChannel, Koohii.Map> lastMapRequested = new HashMap<IChannel, Koohii.Map>();
 
     public static void handle(IGuild guild, IChannel channel, IUser user, IMessage message, String[] args){
         if (args.length == 0) {
@@ -102,7 +98,7 @@ public class OSUHandler {
         String username = OSUIDManager.get(user.getStringID());
         //command param is null or 0 length
         if ("".equals(id) || id == null) {
-            channel.sendMessage("please add your id after %setid command. (e.g. %setid cookiezi)");
+            channel.sendMessage("please add your id after `%osu setid` command. (e.g. %osu setid cookiezi)");
             return false;
         }
 
@@ -139,7 +135,7 @@ public class OSUHandler {
     private static void OSURecent(IChannel channel, IUser user, IMessage message) throws RateLimitException, DiscordException, MissingPermissionsException, IOException {
         String username = OSUIDManager.get(user.getStringID());
         if ("".equals(username) || username == null) {
-            message.reply("set your osu!id first please!(use " + Settings.PREFIX + "setid [id] command");
+            message.reply("set your osu!id first please!(use " + Settings.PREFIX + "osu setid [id] command");
         } else {
             URLConnection conn = URLUtils.openConnection(new URL("https://osu.ppy.sh/api/get_user_recent?"
                             + "k=" + Settings.OSU_APIKEY
@@ -197,7 +193,7 @@ public class OSUHandler {
     private static void OSUProfile(IChannel channel, IUser user, IMessage message) throws RateLimitException, DiscordException, MissingPermissionsException, IOException {
         String username = OSUIDManager.get(user.getStringID());
         if ("".equals(username) || username == null) {
-            message.reply("set your osu!id first please!(use " + Settings.PREFIX + "setid [id] command");
+            message.reply("set your osu!id first please!(use " + Settings.PREFIX + "osu setid [id] command");
         } else {
             URLConnection conn = URLUtils.openConnection(new URL("https://osu.ppy.sh/api/get_user?"
                             + "k=" + Settings.OSU_APIKEY
@@ -265,7 +261,7 @@ public class OSUHandler {
     //目前oppai的java库只支持std和taiko，而且taiko的转谱好像还不准
     public static void calcPP(IChannel channel, IMessage message, String[] params) {
         if (params.length == 0 || params.length > 1) {
-            channel.sendMessage("please use this command like `%pp https://osu.ppy.sh/s/648232`");
+            channel.sendMessage("please use this command like `%osu pp https://osu.ppy.sh/s/648232`");
             return;
         }
         String beatmapid = "";
@@ -362,7 +358,7 @@ public class OSUHandler {
             //oppai by Koohii
             BufferedReader stdin = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             Koohii.Map beatmap = new Koohii.Parser().map(stdin);
-            lastMapRequested.put(channel,beatmap);
+            Maps.LastBeatMapRequested.put(channel,beatmap);
             Koohii.DiffCalc stars = new Koohii.DiffCalc().calc(beatmap);
             Koohii.PPv2 pp = new Koohii.PPv2(
                     stars.aim, stars.speed, beatmap);
@@ -386,7 +382,7 @@ public class OSUHandler {
             channel.sendMessage("unknown mods");
             return;
         }
-        Koohii.Map lastMap = lastMapRequested.get(channel);
+        Koohii.Map lastMap = Maps.LastBeatMapRequested.get(channel);
         if(lastMap == null){
             channel.sendMessage("I don't know which map you are referring.");
             return;

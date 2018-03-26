@@ -4,7 +4,10 @@ import com.moebuff.discord.dao.UserDAO;
 import com.moebuff.discord.entity.User;
 import com.moebuff.discord.utils.MybatisUtil;
 import org.apache.ibatis.session.SqlSession;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
+
+import java.util.List;
 
 public class UserManager {
     private static SqlSession session;
@@ -31,5 +34,15 @@ public class UserManager {
     public static String getInfo(IUser iUser){
         User user = getUser(iUser.getStringID());
         return user.toString();
+    }
+
+    public static void initUser(IGuild guild){
+        List<IUser> userList = guild.getUsers();
+        for(IUser iUser:userList){
+            User user = UserManager.getUser(iUser.getStringID());
+            if(user == null){
+                addUser(iUser);
+            }
+        }
     }
 }

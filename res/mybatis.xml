@@ -16,6 +16,9 @@
                 <property name="password" value="${password}"/>
                 <property name="poolMaximumActiveConnections" value="${poolMaximumActiveConnections}" />
                 <property name="poolMaximumIdleConnections" value="${poolMaximumIdleConnections}" />
+                <property name="poolPingEnabled" value="true"/>
+                <property name="poolPingQuery" value="select * from gift limit 1"/>
+                <property name="poolPingConnectionsNotUsedFor" value="3600000"/>
             </dataSource>
         </environment>
     </environments>

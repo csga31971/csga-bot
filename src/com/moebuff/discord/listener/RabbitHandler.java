@@ -13,6 +13,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.Arrays;
 
@@ -20,8 +21,9 @@ public class RabbitHandler {
 
     private static final String TOO_LONG_TOP = "参数太长";
     private static final String TOO_LONG_BOTTOM = "发出参数太长的声音";
-    private static File file = new File("rabbit/rabbit.jpg");
-    private static File file_result = new File("rabbit/rabbit_result.jpg");
+    private static final File EXCETION = new File("res/rabbit/exception.png");
+    private static File file = new File("res/rabbit/rabbit.jpg");
+    private static File file_result = new File("res/rabbit/rabbit_result.jpg");
 
 
     public static void handle(IGuild guild, IChannel channel, IUser sender, IMessage message, String[] args) {
@@ -55,7 +57,7 @@ public class RabbitHandler {
         try {
             FileUtil.copyFile(file,file_result);
 
-            ImageIcon imageIcon = new ImageIcon("rabbit/" + file_result.getName());
+            ImageIcon imageIcon = new ImageIcon("res/rabbit/" + file_result.getName());
             Image image = imageIcon.getImage();
             int width = image.getWidth(null);
             int height = image.getHeight(null);
@@ -102,7 +104,7 @@ public class RabbitHandler {
                     Log.getLogger().debug("top too long: " + fontSizeTop + " - " + top + " - " + strWidthTop);
                 }
             }
-            g.drawString(top,30 - strWidthTop/2,20+fontSizeTop/2);
+            g.drawString(top,35 - strWidthTop/2,20+fontSizeTop/2);
 
             //绘制底部文字
             if(strWidthBottom > 140){
@@ -117,7 +119,7 @@ public class RabbitHandler {
                     strWidthBottom = fontBottomMetrics.stringWidth(bottom);
                     Log.getLogger().debug("top too long: " + fontSizeBottom + " - " + bottom + " - " + strWidthBottom);
                 }else{
-                    fontSizeBottom = fontSizeBottom*fontSizeBottom*140/strWidthBottom/strWidthBottom;
+                    fontSizeBottom = fontSizeBottom*140/strWidthBottom;
                     fontBottom = new Font(null,Font.BOLD,fontSizeBottom);
                     g.setFont(fontBottom);
 
@@ -136,7 +138,12 @@ public class RabbitHandler {
             //file_result.delete();
         } catch (Exception e){
             e.printStackTrace();
-            channel.sendMessage("something is wrong");
+            try {
+                channel.sendFile(EXCETION);
+            } catch (FileNotFoundException e1) {
+                e1.printStackTrace();
+            }
+            channel.sendMessage("something is wrong:" + e.getMessage());
         }
     }
 }

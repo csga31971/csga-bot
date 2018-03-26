@@ -61,34 +61,4 @@ public class Dialogue {
             channel.sendMessage(e.getMessage());
         }
     }
-
-
-
-    @EventSubscriber
-    public static void onWhatReceive(MessageReceivedEvent event){
-        IMessage message = event.getMessage();
-        IChannel channel = message.getChannel();
-
-        String content = message.getContent();
-        String whatPattern = "[.?。？]*(你说)?(what|waht|啥|什么)[.?。？]*";
-
-        if(content.toLowerCase().matches(whatPattern)){
-            channel.setTypingStatus(true);//正在输入，回复后自动取消
-            MessageHistory messageHistory = channel.getMessageHistory();
-            IMessage repeatMessage = messageHistory.get(1);
-            if(Settings.BOT_ID_STRING.equals(repeatMessage.getAuthor().getStringID())){
-                channel.sendMessage("You should read my words more carefully! ( ╬◣ 益◢)y");
-            }else{
-                /*test
-                channel.sendMessage(
-                        "0:" + messageHistory.get(0) + "\n" +
-                        "1:" + messageHistory.get(1) + "\n" +
-                        "2:" + messageHistory.get(2) + "\n" +
-                        "3:" + messageHistory.get(3) + "\n"
-
-                );*/
-                channel.sendMessage("**" + repeatMessage.getContent() + "**");
-            }
-        }
-    }
 }
