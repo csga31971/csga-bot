@@ -21,6 +21,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 命令行
@@ -156,6 +157,37 @@ public class Command {
             case "setqq":
                 setQQ();
                 break;
+            case "enableqq":
+                if(user.getStringID().equals("267505999764520961")){
+                    MsgFromQQ.getInstance().setEnabled();
+                    MsgFromQQ.getQQThread().start();
+                    channel.sendMessage("qq enabled");
+                }else{
+                    channel.sendMessage("you are not allowed to do this");
+                }
+                break;
+            case "disableqq":
+                if(user.getStringID().equals("267505999764520961")){
+                    MsgFromQQ.getInstance().setDisnabled();
+                    channel.sendMessage("qq disabled");
+                    MsgFromQQ.getQQThread().start();
+                }else{
+                    channel.sendMessage("you are not allowed to do this");
+                }
+                break;
+            case "toqq":
+                if(args.length == 0){
+                    channel.sendMessage("please add option: [1/2] (1=osu hebei, 2=home)");
+                    return;
+                }
+                if(args[0].equals("1")){
+                    RandomListeners.toGroup = 135294979;
+                }else if(args[0].equals("2")){
+                    RandomListeners.toGroup = 139841354;
+                }else{
+                    channel.sendMessage("invalid args.");
+                }
+                break;
             case "init":
                 try{
                     UserManager.initUser(guild);
@@ -164,12 +196,14 @@ public class Command {
                 }
                 channel.sendMessage("successfully initialized users");
                 break;
+            case "help":
+                help();
+                break;
             default:
                 message.getClient().changePlayingText(cmd.substring(1));
                 break;
         }
         // TODO: 命令行模式，摆脱对if和switch的依赖
-
     }
 
     private static void roll()
@@ -211,7 +245,7 @@ public class Command {
                 channel.sendMessage("Wait, I am not repeating myself!");
             }
             if (repeatContent.matches("Wait, I am not repeating myself[!]+")) {
-                channel.sendMessage("Wait, I am not repeating myself!" + "!!!");
+                channel.sendMessage(repeatContent + "!!!");
             }
             return;
         }
@@ -223,7 +257,7 @@ public class Command {
     private static void gust() {
         message.getClient().changePlayingText("with Gust's waifu");
         if(args.length<2) {
-            channel.sendMessage("please play with gust like `" + Settings.PREFIX + "gust [nick] [message]");
+            channel.sendMessage("please play with gust like `" + Settings.PREFIX + "gust [nick] [message]`");
             return;
         }
         try {
@@ -254,11 +288,71 @@ public class Command {
     }
 
     private static void setQQ() {
+        /*channel.sendMessage("currently disabled");
+        return;*/
+
         if(!guild.getStringID().equals("267506592977649675")){
             channel.sendMessage("sorry, this function is for private use");
             return;
         }
-        Maps.QQChannelForGuild.put(guild, channel);
-        channel.sendMessage("set qq channel: " + channel.getName() + ", all messages in this channel will be sent to qq group automatically.");
+        if(args.length==0){
+            channel.sendMessage("set qq channel: " + channel.getName() + ", all messages in this channel will be sent to qq group automatically.");
+            Maps.QQChannelForGuild.put(guild, channel);
+        }else{
+            if(args[0].toLowerCase().equals("r")){
+                channel.sendMessage("set qq channel: null");
+                Maps.QQChannelForGuild.put(guild, channel);
+            }
+        }
+    }
+
+    private static void help(){
+        if(args.length==0){
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("current prefix is `");
+            stringBuilder.append(Settings.PREFIX);
+            stringBuilder.append("`\n");
+            stringBuilder.append("```roll [Integer]: return a random number between [0,Integer)\n");
+            stringBuilder.append("repeat: repeat last message in this channel\n");
+            stringBuilder.append("init: initialize users in this guild\n");
+            stringBuilder.append("say [message]: let me say [message]\n");
+            stringBuilder.append("gust [nick] [message]: return fake qq screenshot\n");
+            stringBuilder.append("panda {index} [message]: return ruozhi panda image\n");
+            stringBuilder.append("rabbit [top-message] [bottom-message]: return ruozhi rabbit image```\n");
+            stringBuilder.append("for more commands, use " + Settings.PREFIX + "help [osu/five/audio/163/gift]");
+            channel.sendMessage(stringBuilder.toString());
+        }else{
+            StringBuilder stringBuilder = new StringBuilder();
+            switch (args[0].toLowerCase()){
+                case "osu":
+                    stringBuilder.append("osu ralated commands. you should use them like %osu {command} [params]\n");
+                    stringBuilder.append("```setid: set your osuid\n");
+                    stringBuilder.append("profile/p: show your profile\n");
+                    stringBuilder.append("recent/r: show your recent submitted play (including fails)\n");
+                    stringBuilder.append("pp {beatmaplink}: show pp for ss on given map\n");
+                    stringBuilder.append("with [mod-combinations] show pp for ss with given mods\n");
+                    stringBuilder.append("search/s [keyword]: search beatmaps with keyword and return top 5 of the result```");
+                    break;
+                case "five":
+                    stringBuilder.append("five-in-a-row ralated commands. you should use them like %five {command} [params]\n");
+                    stringBuilder.append("start/s: create a room\n");
+                    stringBuilder.append("join/j [roomid]: join an existing room\n");
+                    stringBuilder.append("place/p {x} {y}: place chess\n");
+                    stringBuilder.append("quit/q: quit current room");
+                    break;
+                case "audio":
+                    stringBuilder.append("debugging...");
+                    break;
+                case "163":
+                    stringBuilder.append("search/s {keyword}: search music from NetEaseCloudMusic");
+                    break;
+                case "gift":
+                    stringBuilder.append("@Deprecated");
+                    break;
+                    default:
+                    stringBuilder.append("no such command");
+            }
+            channel.sendMessage(stringBuilder.toString());
+        }
     }
 }

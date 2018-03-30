@@ -1,7 +1,7 @@
 package com.moebuff.discord.tuling123;
 
 
-import com.moebuff.discord.io.IOKit;
+import com.moebuff.discord.utils.io.IOKit;
 import com.moebuff.discord.utils.URLUtils;
 import com.moebuff.discord.utils.UnhandledException;
 import org.apache.commons.codec.binary.Base64;

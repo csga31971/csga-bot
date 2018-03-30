@@ -41,7 +41,7 @@ public class Dialogue {
         if (user.isBot()) return;
 
         IDiscordClient client = message.getClient();
-        client.changePlayingText(" with " + user.getNicknameForGuild(event.getGuild()));
+        client.changePlayingText(" with " + user.getDisplayName(event.getGuild()));
 
         Issue issue = TuringFactory.getIssue(user);
         issue.ask(message.getContent());

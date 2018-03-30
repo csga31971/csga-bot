@@ -1,7 +1,7 @@
-package com.moebuff.discord.io;
+package com.moebuff.discord.utils.io;
 
-import com.moebuff.discord.reflect.FieldKit;
-import com.moebuff.discord.reflect.MemberUtils;
+import com.moebuff.discord.utils.reflect.FieldKit;
+import com.moebuff.discord.utils.reflect.MemberUtils;
 import com.moebuff.discord.utils.UnhandledException;
 import org.apache.commons.io.FilenameUtils;
 

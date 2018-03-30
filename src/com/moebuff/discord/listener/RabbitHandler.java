@@ -53,7 +53,7 @@ public class RabbitHandler {
 
     }
 
-    private static void rabbit(IChannel channel, String textTop, String testBottom){
+    private static void rabbit(IChannel channel, String textTop, String textBottom){
         try {
             FileUtil.copyFile(file,file_result);
 
@@ -75,11 +75,16 @@ public class RabbitHandler {
             FontMetrics fontTopMetrics = FontDesignMetrics.getMetrics(fontTop);
             FontMetrics fontBottomMetrics = FontDesignMetrics.getMetrics(fontBottom);
             String top = textTop;
-            String bottom = "发出" + testBottom + "的声音";
+            String bottom = "发出" + textBottom + "的声音";
             int strWidthTop = fontTopMetrics.stringWidth(top);
             int strWidthBottom = fontBottomMetrics.stringWidth(bottom);
             Log.getLogger().debug(strWidthTop + ": " + top + " & " + strWidthBottom + ": " + bottom);
 
+            //太长了，里面塞不下
+            if(strWidthTop > 80 && strWidthBottom> 350){
+                channel.sendFile(EXCETION);
+                return;
+            }
             //绘制对话框文字
             g.setFont(fontTop);
             if(strWidthTop > 50){
@@ -108,7 +113,7 @@ public class RabbitHandler {
 
             //绘制底部文字
             if(strWidthBottom > 140){
-                if(strWidthBottom > 400){
+                if(strWidthBottom > 350){
                     bottom = TOO_LONG_BOTTOM;
                     fontSizeBottom = 14;
                     fontBottom = new Font(null,Font.BOLD,fontSizeBottom);
@@ -117,7 +122,7 @@ public class RabbitHandler {
                     //这两句没用，为了log
                     fontBottomMetrics = FontDesignMetrics.getMetrics(fontBottom);
                     strWidthBottom = fontBottomMetrics.stringWidth(bottom);
-                    Log.getLogger().debug("top too long: " + fontSizeBottom + " - " + bottom + " - " + strWidthBottom);
+                    Log.getLogger().debug("bottom too long: " + fontSizeBottom + " - " + bottom + " - " + strWidthBottom);
                 }else{
                     fontSizeBottom = fontSizeBottom*140/strWidthBottom;
                     fontBottom = new Font(null,Font.BOLD,fontSizeBottom);

@@ -4,12 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 import com.moebuff.discord.Settings;
 import com.moebuff.discord.maps.Maps;
-import com.moebuff.discord.oppai.Koohii;
 import com.moebuff.discord.utils.Log;
 import com.vdurmont.emoji.EmojiManager;
 import sx.blah.discord.api.events.EventSubscriber;
-import sx.blah.discord.handle.impl.events.ReadyEvent;
-import sx.blah.discord.handle.impl.events.guild.GuildCreateEvent;
 import sx.blah.discord.handle.impl.events.guild.GuildEmojisUpdateEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.*;
 import sx.blah.discord.handle.impl.events.guild.channel.message.reaction.ReactionAddEvent;
@@ -20,21 +17,15 @@ import sx.blah.discord.util.MessageHistory;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.Socket;
 import java.net.URL;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class RandomListeners {
 
-    private static String MsgFromQQ = "";
+    public static int toGroup = 139841354;
 
     @EventSubscriber
     public static void onWhatReceive(MessageReceivedEvent event){
@@ -49,14 +40,6 @@ public class RandomListeners {
             if(Settings.BOT_ID_STRING.equals(repeatMessage.getAuthor().getStringID())){
                 channel.sendMessage("You should read my words more carefully! ( ╬◣ 益◢)y");
             }else{
-                /*test
-                channel.sendMessage(
-                        "0:" + messageHistory.get(0) + "\n" +
-                        "1:" + messageHistory.get(1) + "\n" +
-                        "2:" + messageHistory.get(2) + "\n" +
-                        "3:" + messageHistory.get(3) + "\n"
-
-                );*/
                 channel.sendMessage("**" + repeatMessage.getContent() + "**");
             }
         }
@@ -65,15 +48,26 @@ public class RandomListeners {
     @EventSubscriber
     public static void onMessageDelete(MessageDeleteEvent event)
             throws RateLimitException, DiscordException, MissingPermissionsException {
+        IGuild guild = event.getGuild();
+        IChannel channel = event.getChannel();
+        if(channel.getLongID() == 267620421350719488L)
+            //弱智bot神烦
+            return;
         IMessage message = event.getMessage();
+        String content = message.getContent();
         IUser user = message.getAuthor();
-        if (user.isBot()) return;
-        message.reply("You withdrew a message.");
-        IGuild guild = message.getGuild();
+        if (user.isBot() && user!=event.getClient().getOurUser()) return;
+        if(user==event.getClient().getOurUser()){
+            if(content.equals("是哪个狗管理敢撤回老娘的消息，还想不想混了？")){
+                return;
+            }
+            channel.sendMessage("是哪个狗管理敢撤回老娘的消息，还想不想混了？");
+            return;
+        }
         String msg = String.format("You withdrew ***%s*** in ***%s#%s***.",
-                message.getContent(),
+                content,
                 guild == null ? "" : guild.getName(),
-                message.getChannel().getName());
+                channel.getName());
         user.getOrCreatePMChannel().sendMessage(msg);
     }
 
@@ -134,13 +128,36 @@ public class RandomListeners {
     @EventSubscriber
     public static void onRepeating(MessageReceivedEvent event){
         IChannel channel = event.getChannel();
+        //由于是从启动bot时开始缓存消息，所以在刚启动时会发生越界，不用管
         IMessage his1 = channel.getMessageHistory().get(0);
         IMessage his2 = channel.getMessageHistory().get(1);
         IMessage his3 = channel.getMessageHistory().get(2);
 
-        if(his1.getAuthor()!=his1.getClient().getOurUser() && his1.getContent().equals(his2.getContent()) && his2.getContent().equals(his3.getContent())) {
+        if(his2.getAuthor()!=his1.getClient().getOurUser() && his1.getContent().equals(his2.getContent()) && his2.getContent().equals(his3.getContent())) {
             channel.sendMessage(his1.getContent());
             Log.getLogger().info("auto repeat: " + his1.getContent());
+        }
+    }
+
+    @EventSubscriber
+    public static void onRuozhiGustSent(MessageSendEvent event){
+        IChannel channel = event.getChannel();
+        IMessage message = event.getMessage();
+        String content = message.getContent();
+        if(content.matches("(g|G)ust(是)?(弱智|sb|SB|zz|ZZ|ruozhi)")){
+            PandaHandler.sendPanda(channel, 1, "那tm不是废话吗");
+            return;
+        }
+    }
+
+    @EventSubscriber
+    public static void onRuozhiBotSent(MessageSendEvent event){
+        IChannel channel = event.getChannel();
+        IMessage message = event.getMessage();
+        String content = message.getContent();
+        if(content.matches("(弱智|zz|智障|纸张)?(Bot|bot|机器人)(弱智|zz|智障|纸张)?")){
+            PandaHandler.sendPanda(channel, 1, "fnndp那是你");
+            return;
         }
     }
 
@@ -150,8 +167,13 @@ public class RandomListeners {
         IChannel channel = event.getChannel();
         IGuild guild = event.getGuild();
         IUser user = event.getAuthor();
-        IUser our = event.getClient().getOurUser();
         String content = message.getContent();
+        if(!MsgFromQQ.getInstance().isEnabled()){
+            return;
+        }
+        //命令不发送
+        if(content.startsWith(Settings.PREFIX))
+            return;
         //仅供测试
         if(guild.getStringID().equals("267506592977649675") && Maps.QQChannelForGuild.get(guild) == channel){
             try {
@@ -163,13 +185,11 @@ public class RandomListeners {
                 conn.setDoOutput(true);
                 conn.setDoInput(true);
                 Map params = new HashMap();
-                params.put("group_id", 135294979);//osu河北群
+                params.put("group_id", toGroup);
                 String msg = "from discord: <" + user.getName() + ">: " + content;
-
-                //TODO
-                /*
-                好乱，先不管了
-                //自定义表情的文本是 <:267587760297213963:422931971707240459> 分别是guiidID和emojiID
+                Log.getLogger().info("trying to send to qq: " + msg);
+                //TODO 图片处理
+                /*自定义表情的文本是 <:267587760297213963:422931971707240459> 分别是guiidID和emojiID
                 String pattern = "<:267587760297213963:\\d{18}>";
                 int index = 0;
                 if(content.matches("\\S{0}(<:267587760297213963:\\d{18}>)+\\S{0}")) {
@@ -186,9 +206,7 @@ public class RandomListeners {
                     InputStream inputStream = conn.getInputStream();
                     byte[] bytes = new byte[inputStream.available()];
                     inputStream.read(bytes);
-                }
-                */
-
+                }*/
                 params.put("message", msg);
                 params.put("auto_escape", false);
                 String s = new Gson().toJson(params);
@@ -203,7 +221,6 @@ public class RandomListeners {
                     channel.sendMessage(line);
                 }
                 message.getClient().changePlayingText("tencent");
-                Log.getLogger().info(line);
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             } catch (FileNotFoundException e) {
@@ -215,11 +232,27 @@ public class RandomListeners {
     }
 
     @EventSubscriber
-    public static void onBotSentToQQ(MessageSendEvent event){
+    public static void onBotSentInQQChannel(MessageSendEvent event){
         IMessage message = event.getMessage();
         IChannel channel = event.getChannel();
         IGuild guild = event.getGuild();
         IUser our = event.getClient().getOurUser();
+        String content = message.getContent();
+        if(!MsgFromQQ.getInstance().isEnabled()){
+            return;
+        }
+        //命令不发送
+        if(content.startsWith(Settings.PREFIX))
+            return;
+        //bot从qq群接受的消息以及提示消息不能再发回去
+        if(content.startsWith("**[[From QQ]]: <")
+                || content.startsWith("set qq channel: ")
+                || content.equals("you are not allowed to do this")
+                || content.equals("please add option: [1/2] (1=osu hebei, 2=home)")
+                || content.equals("invalid args.")
+                || content.equals("qq enabled")
+                || content.equals("qq disabled"))
+            return;
         //仅供测试
         if(guild.getStringID().equals("267506592977649675") && Maps.QQChannelForGuild.get(guild) == channel){
             try {
@@ -231,19 +264,23 @@ public class RandomListeners {
                 conn.setDoOutput(true);
                 conn.setDoInput(true);
                 Map params = new HashMap();
-                params.put("group_id", 135294979);//osu河北群
-                String msg = "from discord:[" + our.getName() + "]: " + message.getContent();
+                params.put("group_id", toGroup);
+                String msg = "from discord: <" + our.getName() + ">: " + message.getContent();
                 msg += " (没错，这条消息来自本bot，看看这群人都让我说了什么，哼)";
+                Log.getLogger().info("trying to send to qq: " + msg);
                 params.put("message", msg);
                 params.put("auto_escape", false);
                 String s = new Gson().toJson(params);
                 conn.getOutputStream().write(s.getBytes("UTF-8"));
-
                 BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 String line = "";
                 line = reader.readLine();
+                String status = new JsonParser().parse(line).getAsJsonObject().get("status").getAsString();
+                if(status.equals("failed")){
+                    channel.sendMessage("failed to send message to qq group");
+                    channel.sendMessage(line);
+                }
                 message.getClient().changePlayingText("tencent");
-                Log.getLogger().info(line);
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             } catch (FileNotFoundException e) {
@@ -253,6 +290,4 @@ public class RandomListeners {
             }
         }
     }
-
-
 }

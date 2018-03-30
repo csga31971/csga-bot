@@ -1,6 +1,6 @@
 package com.moebuff.discord.maps;
 
-import com.moebuff.discord.oppai.Koohii;
+import com.moebuff.discord.utils.oppai.Koohii;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 

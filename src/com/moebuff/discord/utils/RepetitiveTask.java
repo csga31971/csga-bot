@@ -1,6 +1,6 @@
 package com.moebuff.discord.utils;
 
-import com.moebuff.discord.reflect.FieldKit;
+import com.moebuff.discord.utils.reflect.FieldKit;
 
 import java.lang.reflect.Field;
 import java.util.Timer;

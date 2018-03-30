@@ -1,12 +1,10 @@
 package com.moebuff.discord.listener;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import com.moebuff.discord.Settings;
 import com.moebuff.discord.maps.Maps;
-import com.moebuff.discord.oppai.Koohii;
+import com.moebuff.discord.utils.oppai.Koohii;
+import com.moebuff.discord.entity.osu.search.BeatmapSet;
 import com.moebuff.discord.utils.Log;
 import com.moebuff.discord.service.OSUIDManager;
 import com.moebuff.discord.utils.URLUtils;
@@ -17,19 +15,44 @@ import sx.blah.discord.util.EmbedBuilder;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.X509TrustManager;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.util.Arrays;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.*;
 
 public class OSUHandler {
 
     private static String RANK_A_ICON = "https://cdn.discordapp.com/emojis/365509580593299466.png";
     private static String RANK_S_ICON = "https://cdn.discordapp.com/emojis/365509580731449354.png";
     private static String RANK_SS_ICON = "https://cdn.discordapp.com/emojis/365509580622659585.png";
+
+    static class TrustManager implements X509TrustManager {
+        @Override
+        public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+
+        }
+
+        @Override
+        public void checkServerTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+
+        }
+
+        @Override
+        public X509Certificate[] getAcceptedIssuers() {
+            return new X509Certificate[0];
+        }
+    }
 
     public static void handle(IGuild guild, IChannel channel, IUser user, IMessage message, String[] args){
         if (args.length == 0) {
@@ -50,7 +73,6 @@ public class OSUHandler {
                 param_with_spacebar += " ";
             }
         }
-        Log.getLogger().info("****param_with_spacebar****:" + param_with_spacebar);
         switch (args[0]){
             case "setid":
                 try {
@@ -80,6 +102,10 @@ public class OSUHandler {
                 break;
             case "with":
                 calcPPWithMods(channel, message, params);
+                break;
+            case "search":
+            case "s":
+                searchBeatmap(channel, param_with_spacebar.trim().replace(" ","+"));
                 break;
             default:
                 channel.sendMessage("unknown command.");
@@ -217,11 +243,7 @@ public class OSUHandler {
                 return;
             }
 
-            JsonParser parser = new JsonParser();
-            JsonElement json = parser.parse(result);
-            JsonArray jsonArray = json.getAsJsonArray();
-            JsonElement ele = jsonArray.get(0);
-            JsonObject obj = ele.getAsJsonObject();
+            JsonObject obj = new JsonParser().parse(result).getAsJsonArray().get(0).getAsJsonObject();
 
             String userid = obj.get("user_id").getAsString();
             String _username = obj.get("username").getAsString();
@@ -397,5 +419,59 @@ public class OSUHandler {
                         "**with %s**",
                 lastMap.artist, lastMap.title, lastMap.version, lastMap.creator, stars,pp.total, params[0].toUpperCase()));
         message.getClient().changePlayingText(lastMap.title + " " + params[0]);
+    }
+
+    private static void searchBeatmap(IChannel channel, String keyword){
+        try {
+            //创建SSLContext
+            SSLContext sslContext=SSLContext.getInstance("SSL");
+            TrustManager[] tm={new TrustManager()};
+            //初始化
+            sslContext.init(null, tm, new java.security.SecureRandom());;
+            //获取SSLSocketFactory对象
+            SSLSocketFactory ssf=sslContext.getSocketFactory();
+
+            String requestURL = "https://osu.ppy.sh/beatmapsets/search?q=" + keyword;
+            Log.getLogger().info("requested URL:" + requestURL);
+            URL url = new URL(requestURL);
+            HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+            connection.setDoOutput(true);
+            connection.setDoInput(true);
+            connection.setUseCaches(false);
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("user-agent", Settings.URL_AGENT);
+            connection.setRequestProperty("referer","https://osu.ppy.sh/beatmapsets");
+            connection.setSSLSocketFactory(ssf);
+            connection.setRequestProperty("Cookie", "osu_session=eyJpdiI6IjE1TnhkXC9yaE9Tb3JJamJyZHdhSjJ3PT0iLCJ2YWx1ZSI6IjFTOTBpUEZhMmM1XC9uMlZiXC85VG1sRUZQUEN6OEd3bE1yTW9lNFhaN25Kek8xTlVYUVAxdVVcL1ZISDAzSWFzemI0d1J0NGtZYVE4Ynk2VWtISDVSczFRPT0iLCJtYWMiOiIxNTVjMjQxMTg5ZGMxYjk0ZWMzYTVjN2MxZTYyZGRhZmM5NDA5MmQzYTQwOWNmNmE1MjZkY2FlZTIxOGM0ZWExIn0%3D");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String line = "";
+            String result = "";
+            while((line = reader.readLine())!=null){
+                result += line;
+            }
+            reader.close();
+
+            result = result.replace("card@2x","card2x")
+                    .replace("cover@2x","cover2x")
+                    .replace("list@2x","list2x")
+                    .replace("slimcover@2x","slimcover2x");
+            JsonArray beatmapJsonArray = new JsonParser().parse(result).getAsJsonArray();
+            Gson gson = new Gson();
+            BeatmapSet beatmapSet = null;
+            for(int i = 0;i < 5;i++){
+                beatmapSet = gson.fromJson(beatmapJsonArray.get(i), BeatmapSet.class);
+                channel.sendMessage(beatmapSet.toEmbed());
+            }
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            channel.sendMessage(e.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
+            channel.sendMessage(e.getMessage());
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
+        }
     }
 }

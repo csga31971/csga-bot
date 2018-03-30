@@ -1,4 +1,4 @@
-package com.moebuff.discord.io;
+package com.moebuff.discord.utils.io;
 
 import com.moebuff.discord.utils.UnhandledException;
 

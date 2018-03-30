@@ -1,4 +1,4 @@
-package com.moebuff.discord.reflect;
+package com.moebuff.discord.utils.reflect;
 
 /**
  * 用于创建代理对象的规范化接口

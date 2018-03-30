@@ -1,4 +1,4 @@
-package com.moebuff.discord.oppai;
+package com.moebuff.discord.utils.oppai;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -1306,7 +1306,7 @@ exception since you can check lastline/lastpos when you catch */
 
         /**
          * calls Accuracy(-1, n100, n50, nmisses) .
-         * @see Koohii.Accuracy#Koohii.Accuracy(int, int, int, int)
+         * @see Accuracy#Accuracy(int, int, int, int)
          */
         public Accuracy(int n100, int n50, int nmisses) {
             this(-1, n100, n50, nmisses);
@@ -1314,7 +1314,7 @@ exception since you can check lastline/lastpos when you catch */
 
         /**
          * calls Accuracy(-1, n100, n50, 0) .
-         * @see Koohii.Accuracy#Koohii.Accuracy(int, int, int, int)
+         * @see Accuracy#Accuracy(int, int, int, int)
          */
         public Accuracy(int n100, int n50) {
             this(-1, n100, n50, 0);
@@ -1322,7 +1322,7 @@ exception since you can check lastline/lastpos when you catch */
 
         /**
          * calls Accuracy(-1, n100, 0, 0) .
-         * @see Koohii.Accuracy#Koohii.Accuracy(int, int, int, int)
+         * @see Accuracy#Accuracy(int, int, int, int)
          */
         public Accuracy(int n100) {
             this(-1, n100, 0, 0);
@@ -1422,7 +1422,7 @@ exception since you can check lastline/lastpos when you catch */
      * parameters to be passed to PPv2.
      * aim_stars, speed_stars, max_combo, nsliders, ncircles, nobjects,
      * base_ar, base_od are required.
-     * @see Koohii.PPv2#Koohii.PPv2(Koohii.PPv2Parameters)
+     * @see PPv2#PPv2(Koohii.PPv2Parameters)
      */
     public static class PPv2Parameters
     {
@@ -1656,7 +1656,7 @@ exception since you can check lastline/lastpos when you catch */
 
         /**
          * simplest possible call, calculates ppv2 for SS scorev1.
-         * @see Koohii.PPv2#Koohii.PPv2(Koohii.PPv2Parameters)
+         * @see PPv2#PPv2(Koohii.PPv2Parameters)
          */
         public PPv2(double aim_stars, double speed_stars, Map b)
         {

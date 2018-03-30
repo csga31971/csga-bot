@@ -1,4 +1,4 @@
-package com.moebuff.discord.reflect;
+package com.moebuff.discord.utils.reflect;
 
 import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;

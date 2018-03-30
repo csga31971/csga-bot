@@ -55,11 +55,11 @@ public class PandaHandler {
 
         //空字符串
         if(text.matches("\\s*")){
-            File file = new File("panda/panda" + index + ".jpg");
-            File file_result = new File("panda/panda_result.jpg");
+            File file = new File("res/panda/panda" + index + ".jpg");
+            File file_result = new File("res/panda/panda_result.jpg");
             FileUtil.copyFile(file,file_result);
 
-            ImageIcon imageIcon = new ImageIcon("panda/" + file.getName());
+            ImageIcon imageIcon = new ImageIcon("res/panda/" + file.getName());
             Image image = imageIcon.getImage();
             int width = image.getWidth(null);
             int height = image.getHeight(null);
@@ -80,11 +80,11 @@ public class PandaHandler {
         }else{
             try {
                 //复制一份模板
-                File file = new File("panda/panda" + index + ".jpg");
-                File file_result = new File("panda/panda_result.jpg");
+                File file = new File("res/panda/panda" + index + ".jpg");
+                File file_result = new File("res/panda/panda_result.jpg");
                 FileUtil.copyFile(file,file_result);
 
-                ImageIcon imageIcon = new ImageIcon("panda/" + file.getName());
+                ImageIcon imageIcon = new ImageIcon("res/panda/" + file.getName());
                 Image image = imageIcon.getImage();
                 int width = image.getWidth(null);
                 int height = image.getHeight(null);
@@ -136,6 +136,9 @@ public class PandaHandler {
                 channel.sendMessage("something is wrong");
             }
         }
+    }
 
+    public static void sendPanda(IChannel channel, int index, String message){
+        panda(channel,index,message);
     }
 }
