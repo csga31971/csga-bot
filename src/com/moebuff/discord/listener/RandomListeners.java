@@ -55,6 +55,9 @@ public class RandomListeners {
             return;
         IMessage message = event.getMessage();
         String content = message.getContent();
+        if(content.equals("%repeat") || content.startsWith("%say") || content.startsWith("%superat")){
+            return;
+        }
         IUser user = message.getAuthor();
         if (user.isBot() && user!=event.getClient().getOurUser()) return;
         if(user==event.getClient().getOurUser()){
@@ -129,18 +132,21 @@ public class RandomListeners {
     public static void onRepeating(MessageReceivedEvent event){
         IChannel channel = event.getChannel();
         //由于是从启动bot时开始缓存消息，所以在刚启动时会发生越界，不用管
-        IMessage his1 = channel.getMessageHistory().get(0);
-        IMessage his2 = channel.getMessageHistory().get(1);
-        IMessage his3 = channel.getMessageHistory().get(2);
+        try{
+            IMessage his1 = channel.getMessageHistory().get(0);
+            IMessage his2 = channel.getMessageHistory().get(1);
+            IMessage his3 = channel.getMessageHistory().get(2);
+            if(his2.getAuthor()!=his1.getClient().getOurUser() && his1.getContent().equals(his2.getContent()) && his2.getContent().equals(his3.getContent())) {
+                channel.sendMessage(his1.getContent());
+                Log.getLogger().info("auto repeat: " + his1.getContent());
+            }
+        } catch (ArrayIndexOutOfBoundsException e){
 
-        if(his2.getAuthor()!=his1.getClient().getOurUser() && his1.getContent().equals(his2.getContent()) && his2.getContent().equals(his3.getContent())) {
-            channel.sendMessage(his1.getContent());
-            Log.getLogger().info("auto repeat: " + his1.getContent());
         }
     }
 
     @EventSubscriber
-    public static void onRuozhiGustSent(MessageSendEvent event){
+    public static void onRuozhiGustSend(MessageSendEvent event){
         IChannel channel = event.getChannel();
         IMessage message = event.getMessage();
         String content = message.getContent();
@@ -151,7 +157,7 @@ public class RandomListeners {
     }
 
     @EventSubscriber
-    public static void onRuozhiBotSent(MessageSendEvent event){
+    public static void onRuozhiBotSend(MessageSendEvent event){
         IChannel channel = event.getChannel();
         IMessage message = event.getMessage();
         String content = message.getContent();
@@ -161,6 +167,18 @@ public class RandomListeners {
         }
     }
 
+    @EventSubscriber
+    public static void onWhyReceive(MessageReceivedEvent event){
+        IChannel channel = event.getChannel();
+        IMessage message = event.getMessage();
+        String content = message.getContent();
+        if(content.toLowerCase().matches("(why|为什么|为啥|为毛)(\\?)*") || content.matches("(为什么|为啥)\\S+")){
+            channel.sendMessage("不为什么");
+        }
+    }
+
+
+    /*
     @EventSubscriber
     public static void onDiscordToQQ(MessageReceivedEvent event){
         IMessage message = event.getMessage();
@@ -188,6 +206,7 @@ public class RandomListeners {
                 params.put("group_id", toGroup);
                 String msg = "from discord: <" + user.getName() + ">: " + content;
                 Log.getLogger().info("trying to send to qq: " + msg);
+                */
                 //TODO 图片处理
                 /*自定义表情的文本是 <:267587760297213963:422931971707240459> 分别是guiidID和emojiID
                 String pattern = "<:267587760297213963:\\d{18}>";
@@ -207,6 +226,7 @@ public class RandomListeners {
                     byte[] bytes = new byte[inputStream.available()];
                     inputStream.read(bytes);
                 }*/
+                /*
                 params.put("message", msg);
                 params.put("auto_escape", false);
                 String s = new Gson().toJson(params);
@@ -290,4 +310,5 @@ public class RandomListeners {
             }
         }
     }
+    */
 }

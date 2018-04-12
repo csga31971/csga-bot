@@ -18,6 +18,7 @@ import java.net.Socket;
 
 public class MsgFromQQ extends Thread{
 
+    /*
     private static ServerSocket server;
     private static StringBuilder MsgFromQQ = new StringBuilder("```[[From QQ]]: ");
     private boolean enabled = false;
@@ -82,14 +83,14 @@ public class MsgFromQQ extends Thread{
                 String line = reader.readLine();
                 Log.getLogger().info(line);
                 JsonObject jsonObject = new JsonParser().parse(line).getAsJsonObject();
-                /*格式是这样的
-                私聊：{"font":43829384,"message":"1","message_id":227,"message_type":"private","post_type":"message","self_id":3363779021,"sub_type":"friend","time":1522310959,"user_id":410762240}
-                群聊：{"anonymous":"","anonymous_flag":"","font":144241552,"group_id":139841354,"message":"[CQ:image,file=FFEF68014AC58C66B6B8C115C11F2442.jpg,url=https://gchat.qpic.cn/gchatpic_new/410762240/2082841354-2188827334-FFEF68014AC58C66B6B8C115C11F2442/0?vuin=3363779021&amp;term=2]","message_id":147,"message_type":"group","post_type":"message","self_id":3363779021,"sub_type":"normal","time":1522052680,"user_id":410762240}
-                多图：{"anonymous":"","anonymous_flag":"","font":43957000,"group_id":139841354,"message":"测试一下[CQ:image,file=FFEF68014AC58C66B6B8C115C11F2442.jpg,url=https://gchat.qpic.cn/gchatpic_new/410762240/2082841354-2188827334-FFEF68014AC58C66B6B8C115C11F2442/0?vuin=3363779021&amp;term=2]测试测试[CQ:image,file=FFEF68014AC58C66B6B8C115C11F2442.jpg,url=https://gchat.qpic.cn/gchatpic_new/410762240/2082841354-2188827334-FFEF68014AC58C66B6B8C115C11F2442/0?vuin=3363779021&amp;term=2][CQ:image,file=FFEF68014AC58C66B6B8C115C11F2442.jpg,url=https://gchat.qpic.cn/gchatpic_new/410762240/2082841354-2188827334-FFEF68014AC58C66B6B8C115C11F2442/0?vuin=3363779021&amp;term=2]111","message_id":283,"message_type":"group","post_type":"message","self_id":3363779021,"sub_type":"normal","time":1522373253,"user_id":410762240}
-                coolq不会收到自己发的消息
-                if(jsonObject.get("user_id").getAsString().equals("3363779021"))
-                    return;
-                */
+                //格式是这样的
+                //私聊：{"font":43829384,"message":"1","message_id":227,"message_type":"private","post_type":"message","self_id":3363779021,"sub_type":"friend","time":1522310959,"user_id":410762240}
+                //群聊：{"anonymous":"","anonymous_flag":"","font":144241552,"group_id":139841354,"message":"[CQ:image,file=FFEF68014AC58C66B6B8C115C11F2442.jpg,url=https://gchat.qpic.cn/gchatpic_new/410762240/2082841354-2188827334-FFEF68014AC58C66B6B8C115C11F2442/0?vuin=3363779021&amp;term=2]","message_id":147,"message_type":"group","post_type":"message","self_id":3363779021,"sub_type":"normal","time":1522052680,"user_id":410762240}
+                //多图：{"anonymous":"","anonymous_flag":"","font":43957000,"group_id":139841354,"message":"测试一下[CQ:image,file=FFEF68014AC58C66B6B8C115C11F2442.jpg,url=https://gchat.qpic.cn/gchatpic_new/410762240/2082841354-2188827334-FFEF68014AC58C66B6B8C115C11F2442/0?vuin=3363779021&amp;term=2]测试测试[CQ:image,file=FFEF68014AC58C66B6B8C115C11F2442.jpg,url=https://gchat.qpic.cn/gchatpic_new/410762240/2082841354-2188827334-FFEF68014AC58C66B6B8C115C11F2442/0?vuin=3363779021&amp;term=2][CQ:image,file=FFEF68014AC58C66B6B8C115C11F2442.jpg,url=https://gchat.qpic.cn/gchatpic_new/410762240/2082841354-2188827334-FFEF68014AC58C66B6B8C115C11F2442/0?vuin=3363779021&amp;term=2]111","message_id":283,"message_type":"group","post_type":"message","self_id":3363779021,"sub_type":"normal","time":1522373253,"user_id":410762240}
+                //coolq不会收到自己发的消息
+                //if(jsonObject.get("user_id").getAsString().equals("3363779021"))
+                //    return;
+
                 String msg = jsonObject.get("message").getAsString();
                 MsgFromQQ = new StringBuilder("**[[From QQ]]: <");
                 MsgFromQQ.append(jsonObject.get("user_id").getAsString());
@@ -131,5 +132,5 @@ public class MsgFromQQ extends Thread{
             }
         }
     }
-
+*/
 }

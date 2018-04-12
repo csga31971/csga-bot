@@ -1,5 +1,5 @@
 group 'com.moebuff.discord'
-version '1.6.2-SNAPSHOT'
+version '1.6.3-SNAPSHOT'
 
 apply plugin: 'java'
 apply plugin: "eclipse"

@@ -6,19 +6,23 @@ import com.moebuff.discord.Settings;
 import com.moebuff.discord.maps.Maps;
 import com.moebuff.discord.service.UserManager;
 import com.moebuff.discord.utils.Log;
+import com.moebuff.discord.utils.URLUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.pircbotx.exception.IrcException;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.MessageBuilder;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 
+import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -55,22 +59,27 @@ public class Command {
                 Arrays.copyOfRange(split, 1, split.length) :
                 new String[0];
         String content = message.getContent();
+        int errCmdCount = 0;
         switch (cmd.substring(1).toLowerCase()) {
             case "roll":
                 roll();
+                errCmdCount = 0;
                 break;
             case "vol":
             case "music":
             case "au":
             case "audio":
                 Audio.handle(guild, channel, user, args);
+                errCmdCount = 0;
                 break;
             case "163":
             case "netease":
                 netEase();
+                errCmdCount = 0;
                 break;
             case "off":
             case "exit":
+                errCmdCount = 0;
                 AccessControl auth = new AccessControl(user);
                 try {
                     auth.contains(guild, Permissions.ADMINISTRATOR);
@@ -81,9 +90,11 @@ public class Command {
                 }
                 break;
             case "osu":
+                errCmdCount = 0;
                 OSUHandler.handle(guild,channel,user,message,args);
                 break;
             case "repeat":
+                errCmdCount = 0;
                 repeat();
                 break;
             //禁言相关
@@ -92,30 +103,39 @@ public class Command {
             case "silence":
             case "shuiba":
             case "睡吧":
+                errCmdCount = 0;
                 Silence.silence(guild, channel, user, mentionedUsers);
                 break;
             case "wake":
+                errCmdCount = 0;
                 Silence.wake(guild, channel, user, mentionedUsers);
                 break;
             case "setdogrole":
+                errCmdCount = 0;
                 Silence.setDogRole(guild, channel, user, mentionedRoles);
                 break;
             case "updog":
+                errCmdCount = 0;
                 Silence.updog(guild, channel, user, mentionedUsers);
                 break;
             case "downdog":
+                errCmdCount = 0;
                 Silence.downdog(guild, channel, user, mentionedUsers);
                 break;
             case "setsilencerole":
+                errCmdCount = 0;
                 Silence.setSilenceRole(guild, channel, user, mentionedRoles);
                 break;
             case "setfreechannel":
+                errCmdCount = 0;
                 Silence.setFreeChannel(guild, channel, user);
                 break;
             case "reset":
+                errCmdCount = 0;
                 Silence.reset(guild, channel);
                 break;
             case "gift":
+                errCmdCount = 0;
                 GiftHandler.handle(guild,channel,message.getAuthor(),message,args);
                 break;
             /**
@@ -132,6 +152,7 @@ public class Command {
              break;
              */
             case "gust":
+                errCmdCount = 0;
                 gust();
                 break;
             /*
@@ -141,23 +162,28 @@ public class Command {
                 break;
             */
             case "five":
+                errCmdCount = 0;
                 FiveChess.handle(guild,channel,user,message,args);
                 break;
             case "panda":
+                errCmdCount = 0;
                 PandaHandler.handle(guild,channel,user,message,args);
                 break;
             case "rabbit":
+                errCmdCount = 0;
                 RabbitHandler.handle(guild,channel,user,message,args);
                 break;
             case "say":
+                errCmdCount = 0;
                 if(!content.substring(4).matches("\\s*")){
+                    message.delete();
                     channel.sendMessage(content.substring(4));
                 }
                 break;
-            case "setqq":
+            /*case "setqq":
                 setQQ();
-                break;
-            case "enableqq":
+                break;*/
+            /*case "enableqq":
                 if(user.getStringID().equals("267505999764520961")){
                     MsgFromQQ.getInstance().setEnabled();
                     MsgFromQQ.getQQThread().start();
@@ -174,8 +200,8 @@ public class Command {
                 }else{
                     channel.sendMessage("you are not allowed to do this");
                 }
-                break;
-            case "toqq":
+                break;*/
+            /*case "toqq":
                 if(args.length == 0){
                     channel.sendMessage("please add option: [1/2] (1=osu hebei, 2=home)");
                     return;
@@ -187,8 +213,9 @@ public class Command {
                 }else{
                     channel.sendMessage("invalid args.");
                 }
-                break;
+                break;*/
             case "init":
+                errCmdCount = 0;
                 try{
                     UserManager.initUser(guild);
                 } catch (Exception e){
@@ -197,9 +224,18 @@ public class Command {
                 channel.sendMessage("successfully initialized users");
                 break;
             case "help":
+                errCmdCount = 0;
                 help();
                 break;
+            case "superat":
+                errCmdCount = 0;
+                superat();
+                break;
             default:
+                errCmdCount++;
+                if(errCmdCount>2){
+                    channel.sendMessage("你是弱智吗连个命令都打不对？看老娘play你们是不是很爽？");
+                }
                 message.getClient().changePlayingText(cmd.substring(1));
                 break;
         }
@@ -238,6 +274,7 @@ public class Command {
 
     private static void repeat() {
         IMessage repeated = channel.getMessageHistory().get(1);
+        List<IMessage.Attachment> attachments = repeated.getAttachments();
         String repeatContent = repeated.getContent();
         if (Settings.BOT_ID_STRING.equals(repeated.getAuthor().getStringID())) {
             channel.sendMessage("I won't repeat my words! I'm not a repeater like you! >A<");
@@ -249,8 +286,25 @@ public class Command {
             }
             return;
         }
-        //message.edit(repeatContent);  bots can't edit users' message currently ._.
-        channel.sendMessage(repeatContent);
+        message.delete();
+        if(attachments!=null && attachments.size()>0){
+            try {
+                URL url = new URL(attachments.get(0).getUrl());
+                HttpsURLConnection connection  = (HttpsURLConnection) url.openConnection();
+                connection.addRequestProperty("user-agent",Settings.URL_AGENT);
+                channel.sendFile(repeatContent, connection.getInputStream(), attachments.get(0).getFilename());
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return;
+        }else{
+            channel.sendMessage(repeatContent);
+        }
+
     }
 
     //咼敳罘的api
@@ -303,6 +357,30 @@ public class Command {
                 channel.sendMessage("set qq channel: null");
                 Maps.QQChannelForGuild.put(guild, channel);
             }
+        }
+    }
+
+    private static void superat(){
+        if(args.length==0){
+            channel.sendMessage("please mention the one you want to supermetion");
+            return;
+        }
+        message.delete();
+        int times = 20;
+        List<IUser> mentions = message.getMentions();
+        IUser target = mentions.get(0);
+        String content = target.mention();
+        StringBuilder stringBuilder = new StringBuilder();
+        try {
+            if(args.length==2)
+                times = Integer.valueOf(args[1]);
+        } catch (NumberFormatException e){
+            channel.sendMessage(e.getMessage());
+        }finally {
+            for(int i =0;i<times;i++){
+                stringBuilder.append(content);
+            }
+            channel.sendMessage(stringBuilder.toString());
         }
     }
 
