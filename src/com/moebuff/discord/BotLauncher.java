@@ -1,17 +1,13 @@
 package com.moebuff.discord;
 
-import com.moebuff.discord.reflect.ClassKit;
+import com.moebuff.discord.utils.reflect.ClassKit;
 import com.moebuff.discord.utils.Log;
-import org.apache.commons.lang3.RandomUtils;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
-import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.DiscordException;
-
-import java.util.List;
 
 public class BotLauncher implements IListener<ReadyEvent> {
     private static IDiscordClient client;
@@ -34,9 +30,12 @@ public class BotLauncher implements IListener<ReadyEvent> {
 
     @Override
     public void handle(ReadyEvent event) {
-        List<IUser> users = client.getUsers();
-        int index = RandomUtils.nextInt(0, users.size());
-        String name = users.get(index).getName();
-        client.changePlayingText(name);
+        client.changePlayingText("Exception");
+        //弱智
+        /*IChannel spamChannel = event.getClient().getChannelByID(329504105137438722L);
+        if(spamChannel != null){
+            spamChannel.sendMessage("Let The Bass Kick!");
+            spamChannel.sendMessage("O-oooooooooo AAAAE-A-A-I-A-U- JO-oooooooooooo AAE-O-A-A-U-U-A- E-eee-ee-eee AAAAE-A-E-I-E-A- JO-ooo-oo-oo-oo EEEEO-A-AAA-AAAA");
+        }*/
     }
 }

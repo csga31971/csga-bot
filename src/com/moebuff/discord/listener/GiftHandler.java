@@ -20,7 +20,6 @@ public class GiftHandler {
     private static List<IUser> mentionedList = new ArrayList<IUser>();
 
     public static void handle(IGuild guild,IChannel channel,IUser sender, IMessage message, String[] args){
-        initUser(guild);
         if (args.length == 0) {
             channel.sendMessage("The command requires some additional parameters.");
             channel.sendMessage("For details, refer to the help documentation.");
@@ -72,16 +71,6 @@ public class GiftHandler {
                  channel.sendMessage("unknown command");
                  break;
 
-        }
-    }
-
-    private static void initUser(IGuild guild){
-        List<IUser> userList = guild.getUsers();
-        for(IUser iUser:userList){
-            User user = UserManager.getUser(iUser.getStringID());
-            if(user == null){
-                UserManager.addUser(iUser);
-            }
         }
     }
 

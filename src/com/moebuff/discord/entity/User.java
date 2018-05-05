@@ -49,8 +49,14 @@ public class User {
 
     @Override
     public String toString(){
-        return username + ": money = " + money + "; charm points = " + charmPoint + " ; rich points = " + richPoint + ".";
+        return username + "[" + userid + "]" + ": money = " + money + "; charm points = " + charmPoint + " ; rich points = " + richPoint + ".";
     }
+
+    @Override
+    public boolean equals(Object that){
+        return this.userid.equals(((User)that).getUserid());
+    }
+
     public User(){
         money = 100;
         richPoint = 0;

@@ -1,6 +1,6 @@
 package com.moebuff.discord.utils;
 
-import com.moebuff.discord.reflect.ClassKit;
+import com.moebuff.discord.utils.reflect.ClassKit;
 import org.slf4j.helpers.FormattingTuple;
 
 /**

@@ -94,4 +94,44 @@ public class CloudMusic {
         String mp3Link = CloudMusicUtils.getMp3Link(song_ID[index-1]);//序号比下标大1
         Audio.queueUrl(schannel,mp3Link);
     }
+
+   /*测试
+    static void getSongsByName2(String name){
+        Log.getLogger().info("requested song name:" + name);
+        JsonArray songs = CloudMusicUtils.searchSong(name);
+        //Log.getLogger().info("songs:" + songs.toString());
+        int count = 0;
+        String msg = "Result: \n";
+        for(JsonElement jsonElement:songs){
+            JsonObject song = jsonElement.getAsJsonObject();
+            song_ID[count] = song.get("privilege").getAsJsonObject().get("id").getAsInt();
+            if(count<10){
+                count++;
+                msg += count + ". ";
+                JsonArray artists = song.get("ar").getAsJsonArray();
+                for(JsonElement jsonElement1:artists){
+                    JsonObject artist = jsonElement1.getAsJsonObject();
+                    msg += artist.get("name").getAsString();
+                    msg += " & ";
+                }
+                msg = msg.substring(0,msg.lastIndexOf('&'));
+                msg += "  --  ";
+                msg += song.get("name").getAsString();
+                msg += "\n";
+            }
+        }
+        Log.getLogger().debug(msg);
+    }
+
+    static void playSong2(int index){
+        if(song_ID[0] == 0){
+            return;
+        }
+        String mp3Link = CloudMusicUtils.getMp3Link(song_ID[index-1]);//序号比下标大1
+        Log.getLogger().debug(mp3Link);
+    }
+    public static void main(String[] s){
+        getSongsByName2("freedom dive");
+        playSong2(1);
+    }*/
 }

@@ -1,9 +1,9 @@
 package com.moebuff.discord.listener;
 
 import com.moebuff.discord.Settings;
-import com.moebuff.discord.io.FF;
-import com.moebuff.discord.io.FileHandle;
-import com.moebuff.discord.reflect.ReflectionUtil;
+import com.moebuff.discord.utils.io.FF;
+import com.moebuff.discord.utils.io.FileHandle;
+import com.moebuff.discord.utils.reflect.ReflectionUtil;
 import com.moebuff.discord.utils.Log;
 import com.moebuff.discord.utils.OS;
 import com.moebuff.discord.utils.URLUtils;
@@ -22,6 +22,7 @@ import sx.blah.discord.util.audio.events.TrackStartEvent;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -167,17 +168,21 @@ public class Audio {
         boolean isInVoiceChannel = false;
         
         for(IVoiceChannel v : voiceChannels){
+            Log.getLogger().info(v.getName());
             List<IUser> users = v.getConnectedUsers();
             if(users.contains(user)){
+                Log.getLogger().info(user.getName() + " is in " + v.getName());
                 isInVoiceChannel = true;
                 voice = v;
             }
-            /*for(IUser u : users){
+            /*
+            for(IUser u : users){
                 if (u.getStringID().equals(user.getStringID())) {
                    isInVoiceChannel = true;
                     voice = v;
                 }
-            }*/
+            }
+            */
         }
         if (!isInVoiceChannel) {
             channel.sendMessage("You aren't in a voice channel!");
@@ -188,7 +193,7 @@ public class Audio {
                 channel.sendMessage("I can't join that voice channel!");
             } else if (userLimit > 0 && voice.getConnectedUsers().size() >= userLimit) {
                 channel.sendMessage("That room is full!");
-            } else if (voice.getConnectedUsers().contains(our)) {
+            } else if (voice.getConnectedUsers().contains(user)) {
                 voice.join();
                 LAST_VOICE.put(guild, voice);
                 String msg = String.format("Connected to **%s**.", voice.getName());
@@ -254,7 +259,7 @@ public class Audio {
             conn.setRequestProperty("Accept", "*/*");
 
             String name = FilenameUtils.getName(URLUtils.decode(url::getFile));
-            queue(channel, conn.getInputStream(), name, "url", url);
+            queue(channel, new BufferedInputStream(conn.getInputStream()), name, "url", url);
         } catch (IOException e) {
             channel.sendMessage("Connection failed: " + e.getMessage());
         }

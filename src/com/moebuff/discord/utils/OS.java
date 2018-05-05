@@ -1,6 +1,6 @@
 package com.moebuff.discord.utils;
 
-import com.moebuff.discord.io.FCIV;
+import com.moebuff.discord.utils.io.FCIV;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;

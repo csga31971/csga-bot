@@ -1,7 +1,7 @@
 package com.moebuff.discord.utils;
 
-import com.moebuff.discord.io.FF;
-import com.moebuff.discord.reflect.ReflectionUtil;
+import com.moebuff.discord.utils.io.FF;
+import com.moebuff.discord.utils.reflect.ReflectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;

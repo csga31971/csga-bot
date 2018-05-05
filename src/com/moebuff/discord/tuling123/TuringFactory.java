@@ -1,7 +1,7 @@
 package com.moebuff.discord.tuling123;
 
 import com.moebuff.discord.Settings;
-import com.moebuff.discord.reflect.ClassKit;
+import com.moebuff.discord.utils.reflect.ClassKit;
 import sx.blah.discord.handle.obj.IUser;
 
 import java.util.ArrayList;
